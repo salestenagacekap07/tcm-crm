@@ -817,7 +817,10 @@ async function loadAll(){
   try{
     const lUrl=role==='salesperson'?`${SB}/rest/v1/leads?assigned_to=eq.${uid}&order=created_at.desc&limit=200`:`${SB}/rest/v1/leads?order=created_at.desc&limit=200`;
     const tUrl=role==='salesperson'?`${SB}/rest/v1/tenders?assigned_to=eq.${uid}&order=created_at.desc&limit=200`:`${SB}/rest/v1/tenders?order=created_at.desc&limit=200`;
-    [leads,tenders,profiles]=await Promise.all([api('GET',lUrl,null,token),api('GET',tUrl,null,token),api('GET',`${SB}/rest/v1/profiles?is_active=eq.true&order=full_name.asc`,null,token)]);
+    
+    // Updated line below to fetch all profiles, including inactive ones
+    [leads,tenders,profiles]=await Promise.all([api('GET',lUrl,null,token),api('GET',tUrl,null,token),api('GET',`${SB}/rest/v1/profiles?order=full_name.asc`,null,token)]);
+    
     await loadNotifications();populateFilters();
     
     renderDashboard();renderLeads();
@@ -938,7 +941,8 @@ function openLeadModal(id){
   document.getElementById('sp-fields').style.display=(isSP||id)?'block':'none';
   if(isAdmin&&!id)document.getElementById('sp-fields').style.display='none';
   const spSel=document.getElementById('l-assigned-to');
-  spSel.innerHTML='<option value="">Unassigned</option>'+profiles.filter(p=>p.role==='salesperson').map(p=>`<option value="${p.id}">${esc(p.full_name)}</option>`).join('');
+  // Updated to filter for p.is_active
+  spSel.innerHTML='<option value="">Unassigned</option>'+profiles.filter(p=>p.role==='salesperson' && p.is_active).map(p=>`<option value="${p.id}">${esc(p.full_name)}</option>`).join('');
   if(isSP)sv('l-assigned-to',currentProfile.id);
   ['company','pic','phone','email','notes'].forEach(f=>sv('l-'+f,''));
   ['industry'].forEach(f=>sv('l-'+f,''));
@@ -1061,8 +1065,9 @@ function openTenderModal(id){
   document.getElementById('t-sp-fields').style.display='block';
   document.getElementById('t-other-industry-group').style.display='none';
   document.getElementById('t-awarded-group').style.display='none';
-  const spSel=document.getElementById('t-assigned-to');
-  spSel.innerHTML='<option value="">Unassigned</option>'+profiles.filter(p=>p.role==='salesperson').map(p=>`<option value="${p.id}">${esc(p.full_name)}</option>`).join('');
+ const spSel=document.getElementById('t-assigned-to');
+  // Updated to filter for p.is_active
+  spSel.innerHTML='<option value="">Unassigned</option>'+profiles.filter(p=>p.role==='salesperson' && p.is_active).map(p=>`<option value="${p.id}">${esc(p.full_name)}</option>`).join('');
   if(isSP)sv('t-assigned-to',currentProfile.id);
   ['company','project','pic','pic-phone','pic-email','notes'].forEach(f=>sv('t-'+f,''));
   sv('t-industry','');sv('t-industry-other','');sv('t-status','Ongoing');sv('t-our-price','');sv('t-awarded-price','');sv('t-submit-date','');sv('t-result-date','');sv('t-assigned-to','');
