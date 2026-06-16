@@ -366,21 +366,24 @@ textarea{resize:vertical;min-height:80px}
       <div id="view-deals" class="view">
         <div class="sec-head">
           <div><div class="sec-title">Closed Deals Pipeline</div><div class="sec-sub">Review monthly performance metrics</div></div>
+          
           <div style="display:flex;align-items:center;gap:10px">
             <span style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Filter:</span>
             <select class="fs" id="deals-filter-year" onchange="renderDealsContent()">
-            <option value="">All Years</option>
-            <option value="2030">2030</option><option value="2029">2029</option><option value="2028">2028</option>
-            <option value="2027">2027</option><option value="2026">2026</option><option value="2025">2025</option>
-          </select>
-          <select class="fs" id="deals-filter-month" onchange="renderDealsContent()">
-            <option value="">All Months</option>
-            <option value="01">January</option><option value="02">February</option><option value="03">March</option>
-            <option value="04">April</option><option value="05">May</option><option value="06">June</option>
-            <option value="07">July</option><option value="08">August</option><option value="09">September</option>
-            <option value="10">October</option><option value="11">November</option><option value="12">December</option>
-          </select>
-          <button class="btn btn-secondary btn-sm" onclick="sv('deals-filter-year','');sv('deals-filter-month','');renderDealsContent()">Clear</button>
+              <option value="">All Years</option>
+              <option value="2030">2030</option><option value="2029">2029</option><option value="2028">2028</option>
+              <option value="2027">2027</option><option value="2026">2026</option><option value="2025">2025</option>
+            </select>
+            <select class="fs" id="deals-filter-month" onchange="renderDealsContent()">
+              <option value="">All Months</option>
+              <option value="01">January</option><option value="02">February</option><option value="03">March</option>
+              <option value="04">April</option><option value="05">May</option><option value="06">June</option>
+              <option value="07">July</option><option value="08">August</option><option value="09">September</option>
+              <option value="10">October</option><option value="11">November</option><option value="12">December</option>
+            </select>
+            <button class="btn btn-secondary btn-sm" onclick="sv('deals-filter-year','');sv('deals-filter-month','');renderDealsContent()">Clear</button>
+          </div>
+
         </div>
         <div class="kpi-strip" style="grid-template-columns:repeat(4,1fr)" id="deals-kpi-strip">
           <div class="kpi-cell"><div class="kpi-cell-n" style="color:var(--teal)" id="dkpi-won">0</div><div class="kpi-cell-l">Total Won</div><div class="kpi-cell-bar" style="background:var(--teal)"></div></div>
@@ -932,7 +935,7 @@ function toggleOtherTenderIndustry(){document.getElementById('t-other-industry-g
 function toggleTenderAwarded(){document.getElementById('t-awarded-group').style.display=gv('t-status')==='Lost'?'block':'none';}
 function toggleTenderProof(){document.getElementById('tender-proof-group').style.display=document.getElementById('t-submitted').checked?'block':'none';}
 
-// NEW: Toggle dynamic service inputs
+// Toggle dynamic service inputs
 function toggleOtherService(){
   document.getElementById('other-service-group').style.display = gv('l-service') === 'Other' ? 'block' : 'none';
 }
@@ -1451,34 +1454,20 @@ function renderDealsContent(){
   if(role==='salesperson') return; 
   
   const selectedSP=_dealsSP;
-  const monthSel=document.getElementById('deals-month-filter');
-  if(monthSel){
-    const cur=monthSel.value;
-    const mNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-    let opts = '<option value="">All Time</option>';
-    // Loops from 2030 down to 2025 so newest years are at the top
-    for(let y=2030; y>=2025; y--){
-      for(let m=12; m>=1; m--){
-        const val = `${y}-${String(m).padStart(2,'0')}`;
-        opts += `<option value="${val}"${val===cur?' selected':''}>${mNames[m-1]} ${y}</option>`;
-      }
-    }
-    monthSel.innerHTML = opts;
-  }
-  const selectedMonth=monthSel?monthSel.value:'';
+  const ySel=document.getElementById('deals-filter-year');
+  const mSel=document.getElementById('deals-filter-month');
+  const selectedYear=ySel?ySel.value:'';
+  const selectedMonth=mSel?mSel.value:'';
   
   let filteredLeads=selectedSP?leads.filter(l=>l.assigned_to===selectedSP):leads;
   
-  if(selectedMonth){
-    filteredLeads=filteredLeads.filter(l=>{
-      if(l.status!=='Won'&&l.status!=='Lost'&&l.status!=='Pending')return false;
-      const d=new Date(l.updated_at||l.created_at);
-      const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-      return key===selectedMonth;
-    });
-  } else {
-    filteredLeads = filteredLeads.filter(l=>l.status==='Won'||l.status==='Lost'||l.status==='Pending');
-  }
+  filteredLeads = filteredLeads.filter(l=>{
+    if(l.status!=='Won'&&l.status!=='Lost'&&l.status!=='Pending')return false;
+    const d=new Date(l.updated_at||l.created_at);
+    if(selectedYear && String(d.getFullYear()) !== selectedYear) return false;
+    if(selectedMonth && String(d.getMonth()+1).padStart(2,'0') !== selectedMonth) return false;
+    return true;
+  });
 
   const allWon=filteredLeads.filter(l=>l.status==='Won');
   const allLost=filteredLeads.filter(l=>l.status==='Lost');
@@ -1502,13 +1491,12 @@ function renderDealsContent(){
   container.innerHTML=sps.map(sp=>{
     let spLeads=leads.filter(l=>l.assigned_to===sp.id&&(l.status==='Won'||l.status==='Lost'||l.status==='Pending'));
     
-    if(selectedMonth) {
-      spLeads = spLeads.filter(l=>{
-        const d=new Date(l.updated_at||l.created_at);
-        const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-        return key===selectedMonth;
-      });
-    }
+    spLeads = spLeads.filter(l=>{
+      const d=new Date(l.updated_at||l.created_at);
+      if(selectedYear && String(d.getFullYear()) !== selectedYear) return false;
+      if(selectedMonth && String(d.getMonth()+1).padStart(2,'0') !== selectedMonth) return false;
+      return true;
+    });
 
     const totalWon=spLeads.filter(l=>l.status==='Won').length;
     const totalLost=spLeads.filter(l=>l.status==='Lost').length;
@@ -1522,6 +1510,8 @@ function renderDealsContent(){
     spLeads.forEach(l=>{const d=new Date(l.updated_at||l.created_at);const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;if(!byMonth[key])byMonth[key]=[];byMonth[key].push(l);});
     const sortedMonths=Object.keys(byMonth).sort((a,b)=>b.localeCompare(a));
     
+    const isFiltered = selectedYear || selectedMonth;
+
     return`<div class="sp-deal-block">
       <div class="sp-deal-head">
         <div class="sp-deal-av">${av}</div>
@@ -1545,7 +1535,7 @@ function renderDealsContent(){
         
         return`<div class="month-section">
           <div class="month-header" onclick="toggleMonth('${bodyId}')">
-            <span style="font-size:11px;margin-right:4px" id="arr-${bodyId}">${idx===0?'▼':'▶'}</span>
+            <span style="font-size:11px;margin-right:4px" id="arr-${bodyId}">${isFiltered||idx===0?'▼':'▶'}</span>
             <span class="month-title">${monthName}</span>
             <div class="month-pills">
               <span class="mpill mpill-won">✅ ${mWon.length}</span>
@@ -1554,7 +1544,7 @@ function renderDealsContent(){
               ${mVal>0?`<span class="mpill mpill-val">RM ${fmtN(mVal)}</span>`:''}
             </div>
           </div>
-          <div class="month-body ${selectedMonth?'':'collapsed'}" id="${bodyId}">
+          <div class="month-body ${isFiltered||idx===0?'':'collapsed'}" id="${bodyId}">
             <div class="overflow"><table>
               <thead><tr><th>Company</th><th>PIC</th><th>Industry</th><th style="background:#eef2ff;color:#1e3a8a">Service</th><th style="background:#eef2ff;color:#1e3a8a">No. Pax</th><th style="background:#eef2ff;color:#1e3a8a">Price (RM)</th><th>Status</th><th>Visit</th><th>Quotation</th></tr></thead>
               <tbody>${mLeads.map(l=>{
@@ -1709,4 +1699,3 @@ checkSession();
 </script>
 </body>
 </html>
-
