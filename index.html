@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -130,7 +131,7 @@ tr:hover td{background:var(--surface)}
 .mail-btn:hover{background:var(--surface)}
 
 .sp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
-.sp-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem 1.5rem;display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px;width:100%;box-shadow:var(--shadow)}
+.sp-card{position:relative;background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem 1.5rem;display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px;width:100%;box-shadow:var(--shadow)}
 .sp-av{width:80px;height:80px;border-radius:50%;background:var(--blue-light);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:var(--blue);overflow:hidden;border:4px solid var(--surface); flex-shrink:0;}
 .sp-av img{width:100%;height:100%;object-fit:cover}
 
@@ -818,7 +819,7 @@ async function loadAll(){
     const lUrl=role==='salesperson'?`${SB}/rest/v1/leads?assigned_to=eq.${uid}&order=created_at.desc&limit=200`:`${SB}/rest/v1/leads?order=created_at.desc&limit=200`;
     const tUrl=role==='salesperson'?`${SB}/rest/v1/tenders?assigned_to=eq.${uid}&order=created_at.desc&limit=200`:`${SB}/rest/v1/tenders?order=created_at.desc&limit=200`;
     
-    // Updated line below to fetch all profiles, including inactive ones
+    // Fetch all profiles so data isn't permanently unlinked
     [leads,tenders,profiles]=await Promise.all([api('GET',lUrl,null,token),api('GET',tUrl,null,token),api('GET',`${SB}/rest/v1/profiles?order=full_name.asc`,null,token)]);
     
     await loadNotifications();populateFilters();
@@ -940,9 +941,11 @@ function openLeadModal(id){
   document.getElementById('admin-fields').style.display=isAdmin?'block':'none';
   document.getElementById('sp-fields').style.display=(isSP||id)?'block':'none';
   if(isAdmin&&!id)document.getElementById('sp-fields').style.display='none';
+  
   const spSel=document.getElementById('l-assigned-to');
-  // Updated to filter for p.is_active
+  // Filter for active users only
   spSel.innerHTML='<option value="">Unassigned</option>'+profiles.filter(p=>p.role==='salesperson' && p.is_active).map(p=>`<option value="${p.id}">${esc(p.full_name)}</option>`).join('');
+  
   if(isSP)sv('l-assigned-to',currentProfile.id);
   ['company','pic','phone','email','notes'].forEach(f=>sv('l-'+f,''));
   ['industry'].forEach(f=>sv('l-'+f,''));
@@ -1065,9 +1068,11 @@ function openTenderModal(id){
   document.getElementById('t-sp-fields').style.display='block';
   document.getElementById('t-other-industry-group').style.display='none';
   document.getElementById('t-awarded-group').style.display='none';
- const spSel=document.getElementById('t-assigned-to');
-  // Updated to filter for p.is_active
+  
+  const spSel=document.getElementById('t-assigned-to');
+  // Filter for active users only
   spSel.innerHTML='<option value="">Unassigned</option>'+profiles.filter(p=>p.role==='salesperson' && p.is_active).map(p=>`<option value="${p.id}">${esc(p.full_name)}</option>`).join('');
+  
   if(isSP)sv('t-assigned-to',currentProfile.id);
   ['company','project','pic','pic-phone','pic-email','notes'].forEach(f=>sv('t-'+f,''));
   sv('t-industry','');sv('t-industry-other','');sv('t-status','Ongoing');sv('t-our-price','');sv('t-awarded-price','');sv('t-submit-date','');sv('t-result-date','');sv('t-assigned-to','');
@@ -1157,6 +1162,7 @@ async function deleteTender(id){if(!confirm('Delete this tender?'))return;try{aw
 
 function openAddSPModal(){['sp-name','sp-email','sp-phone','sp-password'].forEach(f=>sv(f,''));sv('sp-role','salesperson');document.getElementById('sp-modal').classList.add('open');}
 function closeSPModal(){document.getElementById('sp-modal').classList.remove('open');}
+
 async function saveSalesperson(){
   const name=gv('sp-name'),email=gv('sp-email'),pw=gv('sp-password'),role=gv('sp-role'),phone=gv('sp-phone');
   if(!name||!email||!pw){toast('Fill Name, Email and Password.','error');return;}
@@ -1172,8 +1178,9 @@ async function saveSalesperson(){
         const existing=await fetch(`${SB}/rest/v1/profiles?email=eq.${encodeURIComponent(email)}&select=id`,{headers:getH(currentUser.token)});
         const existArr=await existing.json();
         if(existArr.length){
+          // Restores the soft-deleted user completely!
           await fetch(`${SB}/rest/v1/profiles?id=eq.${existArr[0].id}`,{method:'PATCH',headers:getH(currentUser.token),body:JSON.stringify({full_name:name,phone:phone||null,role,is_active:true})});
-          toast(`Profile updated for ${name}!`,'success');closeSPModal();await loadAll();renderSalespersons();return;
+          toast(`Profile updated/restored for ${name}!`,'success');closeSPModal();await loadAll();renderSalespersons();return;
         }
         throw new Error('Email already registered.');
       }
@@ -1184,6 +1191,20 @@ async function saveSalesperson(){
   }catch(e){toast(e.message,'error');}
   finally{btn.innerHTML='Create Account';btn.disabled=false;}
 }
+
+// Master Admin Soft Delete
+async function softDeleteSP(id, name) {
+  if(!confirm(`Completely remove ${name}? \n\n(Note: Their data is safe. You can restore their account and leads later simply by clicking "Add Team Member" and typing their exact email address).`)) return;
+  try {
+    await api('PATCH', `${SB}/rest/v1/profiles?id=eq.${id}`, { role: 'deleted', is_active: false }, currentUser.token);
+    toast('User removed from roster.', 'success');
+    await loadAll();
+    renderSalespersons();
+  } catch(e) {
+    toast('Failed to remove user.', 'error');
+  }
+}
+
 async function deactivateSP(id,name){if(!confirm(`Deactivate ${name}?`))return;try{await api('PATCH',`${SB}/rest/v1/profiles?id=eq.${id}`,{is_active:false},currentUser.token);toast('Deactivated.','success');await loadAll();renderSalespersons();}catch(e){toast('Failed.','error');}}
 async function reactivateSP(id,name){try{await api('PATCH',`${SB}/rest/v1/profiles?id=eq.${id}`,{is_active:true},currentUser.token);toast(`${name} reactivated.`,'success');await loadAll();renderSalespersons();}catch(e){toast('Failed.','error');}}
 
@@ -1204,8 +1225,6 @@ function renderProfilePage(){
   const myVal=myLeads.filter(l=>l.status==='Won').reduce((s,l)=>s+(l.price||0),0);
   const setEl=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
   setEl('pkpi-won',myWon);setEl('pkpi-active',myActive);setEl('pkpi-val','RM '+fmtN(myVal));
-  
-  // NOTE: Master Admin forced reset card rendering removed here
 }
 
 async function handleProfilePic(input){
@@ -1222,7 +1241,6 @@ async function handleProfilePic(input){
 async function saveProfile(){const name=gv('profile-name'),phone=gv('profile-phone');if(!name){toast('Name cannot be empty.','error');return;}try{await api('PATCH',`${SB}/rest/v1/profiles?id=eq.${currentProfile.id}`,{full_name:name,phone,updated_at:new Date().toISOString()},currentUser.token);currentProfile.full_name=name;currentProfile.phone=phone;renderTopbarProfile();renderProfilePage();toast('Saved!','success');}catch(e){toast('Save failed.','error');}}
 async function changePassword(){const np=gv('new-password'),cp=gv('confirm-password');if(!np||np.length<6){toast('Min 6 characters.','error');return;}if(np!==cp){toast('Passwords do not match.','error');return;}try{const r=await fetch(`${SB}/auth/v1/user`,{method:'PUT',headers:{'apikey':ANON_KEY,'Authorization':'Bearer '+currentUser.token,'Content-Type':'application/json'},body:JSON.stringify({password:np})});if(!r.ok)throw new Error();sv('new-password','');sv('confirm-password','');toast('Password updated successfully!','success');}catch(e){toast('Failed to update.','error');}}
 
-// NOTE: resetSPPassword() deleted here
 
 function profileName(id){const p=profiles.find(x=>x.id===id);return p?p.full_name:'Unassigned';}
 
@@ -1625,8 +1643,13 @@ function renderSalespersons(){
     const wonVal=myL.filter(l=>l.status==='Won').reduce((s,l)=>s+(l.price||0),0);
     const rmap={admin:['Admin','rc-admin'],salesperson:['Salesperson','rc-sales']};
     const[rl,rc]=rmap[p.role]||['Salesperson','rc-sales'];
+    
+    // Permission checks
     const canAct=currentProfile.role==='master_admin'||(currentProfile.role==='admin'&&p.role==='salesperson');
+    const isMasterAdmin=currentProfile.role==='master_admin';
+    
     return`<div class="sp-card">
+      ${isMasterAdmin ? `<button class="btn-icon red" style="position:absolute;top:10px;right:10px;font-size:12px;padding:4px;" title="Remove User completely" onclick="softDeleteSP('${p.id}','${esc(p.full_name)}')">✕</button>` : ''}
       <div class="sp-av">${p.avatar_data?`<img src="${getFileUrl(p.avatar_data)}" alt="">`:(p.full_name||'?')[0].toUpperCase()}</div>
       <div style="width:100%;text-align:center">
         <div style="font-weight:700;font-size:14px">${esc(p.full_name)}</div>
@@ -1671,3 +1694,4 @@ checkSession();
 </script>
 </body>
 </html>
+
