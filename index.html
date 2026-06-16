@@ -1446,9 +1446,16 @@ function renderDealsContent(){
   const monthSel=document.getElementById('deals-month-filter');
   if(monthSel){
     const cur=monthSel.value;
-    const allClosed=leads.filter(l=>l.status==='Won'||l.status==='Lost'||l.status==='Pending');
-    const months=[...new Set(allClosed.map(l=>{const d=new Date(l.updated_at||l.created_at);return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}))].sort((a,b)=>b.localeCompare(a));
-    monthSel.innerHTML='<option value="">All Months</option>'+months.map(m=>{const[y,mo]=m.split('-');const label=new Date(parseInt(y),parseInt(mo)-1,1).toLocaleString('en-MY',{month:'long',year:'numeric'});return`<option value="${m}"${m===cur?' selected':''}>${label}</option>`;}).join('');
+    const mNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    let opts = '<option value="">All Time</option>';
+    // Loops from 2030 down to 2025 so newest years are at the top
+    for(let y=2030; y>=2025; y--){
+      for(let m=12; m>=1; m--){
+        const val = `${y}-${String(m).padStart(2,'0')}`;
+        opts += `<option value="${val}"${val===cur?' selected':''}>${mNames[m-1]} ${y}</option>`;
+      }
+    }
+    monthSel.innerHTML = opts;
   }
   const selectedMonth=monthSel?monthSel.value:'';
   
