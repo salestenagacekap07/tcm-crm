@@ -1,0 +1,1668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCM CRM — Tenaga Cekap Management</title>
+<link rel="icon" href="https://tenagacekap.com.my/wp-content/uploads/2019/05/tenaga-log-icon.png">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue: #2563eb; --blue-dark: #1d4ed8; --blue-light: #eff6ff; --blue-mid: #3b82f6;
+  --teal: #0d9488; --teal-dark: #0f766e; --teal-bg: #f0fdfa;
+  --text: #0f172a; --muted: #64748b; --hint: #94a3b8;
+  --bg: #ffffff; --surface: #f8fafc; --surface2: #e2e8f0; --hover: #f1f5f9;
+  --sidebar-bg: #1e293b; --sidebar-hover: #334155; --sidebar-text: #94a3b8;
+  --border: #e2e8f0; --border-md: #cbd5e1;
+  --radius: 8px; --radius-lg: 12px; --radius-xl: 16px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+body{font-family:var(--font);background:var(--surface);color:var(--text);font-size:13px;line-height:1.4}
+
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1e293b 0%,#334155 40%,var(--blue) 100%);padding:1rem}
+.login-card{background:#fff;border-radius:var(--radius-xl);box-shadow:var(--shadow-lg);padding:2.25rem;width:100%;max-width:390px}
+.login-logo{text-align:center;margin-bottom:1.75rem}
+.login-logo img{width:52px;height:52px;object-fit:contain;margin-bottom:8px}
+.login-logo h1{font-size:19px;font-weight:700;color:var(--text)}.login-logo h1 span{color:var(--blue)}
+.login-logo p{font-size:12px;color:var(--muted);margin-top:3px}
+.login-tabs{display:flex;background:var(--surface);border-radius:var(--radius);padding:3px;margin-bottom:1.25rem;gap:2px}
+.login-tab{flex:1;padding:6px;text-align:center;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;color:var(--muted)}
+.login-tab.active{background:#fff;color:var(--blue);box-shadow:var(--shadow)}
+.fl{margin-bottom:.875rem}
+.fl label{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px}
+.fl input{width:100%;padding:9px 11px;border:1px solid var(--border-md);border-radius:var(--radius);font-size:13px;color:var(--text);outline:none;font-family:var(--font)}
+.fl input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.remember-row{display:flex;align-items:center;gap:7px;margin-bottom:1rem;font-size:12px;color:var(--muted);cursor:pointer}
+.remember-row input{width:auto;margin:0}
+.login-btn{width:100%;padding:10px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer}
+.login-btn:hover{background:var(--blue-dark)}
+.login-error{background:#fee2e2;color:#dc2626;border-radius:var(--radius);padding:9px 11px;font-size:12px;margin-bottom:.875rem;display:none}
+
+.app{display:none;height:100vh;overflow:hidden;flex-direction:row;width:100%}
+.sidebar{width:250px;background:var(--sidebar-bg);display:flex;flex-direction:column;flex-shrink:0;z-index:100;transition:all 0.3s}
+.sidebar .logo{padding:1.5rem 1.25rem;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,0.05)}
+.sidebar .logo img{width:28px;height:28px;object-fit:contain}
+.sidebar .logo span{font-size:15px;font-weight:700;color:#fff}.sidebar .logo b{color:var(--blue-mid)}
+.nav-tabs{display:flex;flex-direction:column;padding:1rem 0;flex:1;overflow-y:auto;gap:4px}
+.nav-tab{padding:12px 1.5rem;display:flex;align-items:center;gap:10px;cursor:pointer;color:var(--sidebar-text);font-size:13px;font-weight:500;border-left:3px solid transparent;transition:all 0.2s}
+.nav-tab:hover{background:var(--sidebar-hover);color:#fff}
+.nav-tab.active{background:rgba(37,99,235,0.15);color:#fff;border-left-color:var(--blue-mid);font-weight:600}
+
+.content-wrapper{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--surface)}
+.top-header{height:60px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;flex-shrink:0;z-index:50}
+.header-title{font-size:15px;font-weight:700;color:var(--text)}
+
+.topbar-right{display:flex;align-items:center;gap:12px}
+.notif-btn{position:relative;background:none;border:none;cursor:pointer;padding:6px;border-radius:var(--radius);color:var(--muted);font-size:16px;display:flex;align-items:center}
+.notif-btn:hover{background:var(--surface2)}
+.notif-badge{position:absolute;top:2px;right:2px;background:#e03131;color:#fff;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:none;align-items:center;justify-content:center;padding:0 3px}
+.topbar-avatar{width:32px;height:32px;border-radius:50%;background:var(--blue-light);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--blue);cursor:pointer;overflow:hidden;flex-shrink:0;border:2px solid transparent;transition:border-color 0.2s}
+.topbar-avatar:hover{border-color:var(--blue)}
+.topbar-avatar img{width:100%;height:100%;object-fit:cover}
+.role-chip{font-size:9px;font-weight:700;padding:3px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.4px}
+.rc-master{background:#fef3c7;color:#92400e}.rc-admin{background:#ede9fe;color:#5b21b6}.rc-sales{background:var(--teal-bg);color:var(--teal-dark)}
+
+.btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:var(--radius);font-size:12px;font-weight:600;cursor:pointer;border:none;line-height:1.4;text-decoration:none;font-family:var(--font);transition:all 0.2s}
+.btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:var(--blue-dark);box-shadow:0 2px 4px rgba(37,99,235,0.2)}
+.btn-teal{background:var(--teal);color:#fff}.btn-teal:hover{background:var(--teal-dark)}
+.btn-secondary{background:#fff;color:var(--text);border:1px solid var(--border-md)}.btn-secondary:hover{background:var(--surface);border-color:var(--muted)}
+.btn-danger{background:#fef2f2;color:#dc2626;border:1px solid #fecaca}.btn-danger:hover{background:#fee2e2}
+.btn-sm{padding:5px 10px;font-size:11px}
+.btn-icon{background:none;border:none;cursor:pointer;padding:4px 6px;border-radius:4px;color:var(--muted);display:inline-flex;align-items:center;font-size:14px;line-height:1;font-family:var(--font);transition:all 0.2s}
+.btn-icon:hover{background:var(--surface2);color:var(--text)}
+.btn-icon.red:hover{background:#fef2f2;color:#dc2626}
+
+.main{padding:1.5rem 2rem;overflow-y:auto;flex:1;max-width:1600px;width:100%;margin:0 auto}
+.view{display:none;animation:fadeIn 0.3s ease}.view.active{display:block}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow)}
+
+.metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:1.5rem}
+.metric-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;box-shadow:var(--shadow)}
+.metric-label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.metric-val{font-size:28px;font-weight:700;line-height:1}
+.mv-blue{color:var(--blue)}.mv-teal{color:var(--teal)}.mv-red{color:#dc2626}.mv-amber{color:#d97706}
+
+.table-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid var(--border);gap:12px;flex-wrap:wrap;background:#fff;border-radius:var(--radius-lg) var(--radius-lg) 0 0}
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sw{position:relative}
+.sw svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--hint);width:14px;height:14px}
+.si{padding:7px 12px 7px 32px;border:1px solid var(--border-md);border-radius:var(--radius);font-size:13px;background:#fff;color:var(--text);width:220px;outline:none;transition:all 0.2s}
+.si:focus,.fs:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.fs{padding:7px 28px 7px 12px;border:1px solid var(--border-md);border-radius:var(--radius);font-size:13px;background:#fff;color:var(--text);outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;cursor:pointer;transition:all 0.2s}
+.overflow{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:10px 14px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);border-bottom:1px solid var(--border);background:var(--surface);white-space:nowrap}
+td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface)}
+
+.badge{display:inline-flex;align-items:center;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+.b-won{background:#dcfce7;color:#166534}.b-lost{background:#fee2e2;color:#991b1b}.b-pending{background:#fef3c7;color:#92400e}.b-new{background:#eff6ff;color:#1e40af}.b-ongoing{background:#ede9fe;color:#5b21b6}
+
+.empty{text-align:center;padding:3rem 1rem;color:var(--muted);font-size:13px;background:#fff;border-radius:var(--radius-lg)}
+
+.sp-deal-block{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:1.5rem;overflow:hidden;box-shadow:var(--shadow)}
+.sp-deal-head{padding:1rem 1.5rem;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.sp-deal-av{width:42px;height:42px;border-radius:50%;background:var(--blue-light);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:var(--blue);flex-shrink:0;border:2px solid var(--surface2)}
+.sp-deal-av img{width:100%;height:100%;object-fit:cover}
+.month-section{border-bottom:1px solid var(--border)}
+.month-section:last-child{border-bottom:none}
+.month-header{padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;transition:background 0.2s}
+.month-header:hover{background:var(--surface2)}
+.month-title{font-size:12px;font-weight:600;color:var(--text)}
+.month-pills{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
+.mpill{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.mpill-won{background:#dcfce7;color:#166534}.mpill-lost{background:#fee2e2;color:#991b1b}.mpill-pending{background:#fef3c7;color:#92400e}.mpill-val{background:var(--blue-light);color:var(--blue-dark)}
+.month-body{display:block}
+.month-body.collapsed{display:none}
+
+.retarget-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;display:flex;align-items:center;gap:16px;margin-bottom:12px;width:100%;box-shadow:var(--shadow);transition:transform 0.2s}
+.retarget-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.avatar{width:44px;height:44px;border-radius:50%;background:var(--blue-light);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--blue);flex-shrink:0}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.wa-btn{background:#25D366;color:#fff;border:none;border-radius:var(--radius);padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;text-decoration:none;transition:background 0.2s}
+.wa-btn:hover{background:#1ea952}
+.mail-btn{background:#fff;color:var(--blue);border:1px solid var(--border-md);border-radius:var(--radius);padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;text-decoration:none;transition:background 0.2s}
+.mail-btn:hover{background:var(--surface)}
+
+.sp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
+.sp-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem 1.5rem;display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px;width:100%;box-shadow:var(--shadow)}
+.sp-av{width:80px;height:80px;border-radius:50%;background:var(--blue-light);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:var(--blue);overflow:hidden;border:4px solid var(--surface); flex-shrink:0;}
+.sp-av img{width:100%;height:100%;object-fit:cover}
+
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(15,23,42,0.6);z-index:200;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(2px)}
+.modal-backdrop.open{display:flex}
+.modal{background:#fff;border-radius:var(--radius-xl);box-shadow:var(--shadow-lg);width:100%;max-width:600px;max-height:90vh;overflow-y:auto;animation:fadeIn 0.2s ease}
+.modal-sm{max-width:440px}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);position:sticky;top:0;background:#fff;z-index:1}
+.modal-title{font-size:16px;font-weight:700;color:var(--text)}
+.modal-body{padding:1.5rem}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;padding:1rem 1.5rem;border-top:1px solid var(--border);position:sticky;bottom:0;background:#f8fafc}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.fg{display:flex;flex-direction:column;gap:6px}.fg.full{grid-column:1/-1}
+.flabel{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+input[type=text],input[type=email],input[type=tel],input[type=date],input[type=number],input[type=password],select,textarea{padding:9px 12px;border:1px solid var(--border-md);border-radius:var(--radius);font-size:13px;background:#fff;color:var(--text);outline:none;width:100%;font-family:var(--font);transition:border-color 0.2s}
+input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+textarea{resize:vertical;min-height:80px}
+.upload-zone{border:2px dashed var(--border-md);border-radius:var(--radius);padding:20px;text-align:center;cursor:pointer;color:var(--muted);font-size:13px;background:var(--surface);transition:all 0.2s}
+.upload-zone:hover{border-color:var(--blue);background:var(--blue-light);color:var(--blue-dark)}
+.file-chip{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:12px;margin-top:8px;flex-wrap:wrap;box-shadow:var(--shadow)}
+.info-box{background:var(--blue-light);border:1px solid #bfdbfe;border-radius:var(--radius);padding:10px 14px;font-size:13px;color:var(--blue-dark);margin-bottom:16px;display:flex;gap:8px;align-items:center}
+.section-sep{font-size:12px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.5px;margin:20px 0 12px;padding-bottom:8px;border-bottom:2px solid var(--surface2)}
+
+.profile-grid-a{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+
+.notif-panel{position:absolute;top:60px;right:0;width:340px;max-height:calc(100vh - 60px);background:#fff;border-left:1px solid var(--border);border-bottom:1px solid var(--border);box-shadow:var(--shadow-lg);z-index:100;display:none;flex-direction:column;border-radius:0 0 0 var(--radius-lg)}
+.notif-panel.open{display:flex}
+.notif-panel-head{padding:1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface)}
+.notif-list{overflow-y:auto;flex:1}
+.notif-item{padding:1rem;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.2s}
+.notif-item:hover{background:var(--surface)}
+.notif-item.unread{background:var(--blue-light);border-left:3px solid var(--blue)}
+.notif-item-title{font-weight:600;margin-bottom:4px;font-size:13px;color:var(--text)}
+.notif-item-msg{color:var(--muted);line-height:1.4;font-size:12px}
+.notif-item-time{font-size:11px;color:var(--hint);margin-top:6px}
+
+.toast{position:fixed;bottom:24px;right:24px;background:#1e293b;color:#fff;padding:12px 20px;border-radius:var(--radius);font-size:13px;z-index:9999;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;transform:translateY(10px);box-shadow:var(--shadow-lg);font-weight:500}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.success{background:#15803d;border-left:4px solid #4ade80}
+.toast.error{background:#b91c1c;border-left:4px solid #f87171}
+.spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:12px}
+.sec-title{font-size:18px;font-weight:700;color:var(--text)}
+.sec-sub{font-size:13px;color:var(--muted);margin-top:4px}
+
+.kpi-strip{display:grid;grid-template-columns:repeat(5,1fr);background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:1.5rem;overflow:hidden;box-shadow:var(--shadow)}
+.kpi-cell{padding:1.5rem;border-right:1px solid var(--border);position:relative}
+.kpi-cell:last-child{border-right:none}
+.kpi-cell-n{font-size:32px;font-weight:700;line-height:1;margin-bottom:6px}
+.kpi-cell-l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.kpi-cell-bar{position:absolute;bottom:0;left:0;right:0;height:4px;border-radius:0}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+.two-col-wide{display:grid;grid-template-columns:3fr 2fr;gap:20px;margin-bottom:20px}
+.panel-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow)}
+.panel-head{padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface)}
+.panel-head-title{font-size:14px;font-weight:700;color:var(--text)}
+.panel-body{padding:0}
+.panel-row{display:flex;align-items:center;gap:12px;padding:1rem 1.5rem;border-bottom:1px solid var(--border);transition:background 0.2s}
+.panel-row:last-child{border-bottom:none}
+.panel-row:hover{background:var(--surface)}
+.pr-av{width:36px;height:36px;border-radius:50%;background:var(--blue-light);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--blue);flex-shrink:0;overflow:hidden}
+.pr-av img{width:100%;height:100%;object-fit:cover}
+.pr-name{font-size:13px;font-weight:600;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pr-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.perf-bar-wrap{width:100px;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;flex-shrink:0}
+.perf-bar{height:100%;border-radius:3px;background:var(--blue)}
+.team-grid-a{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.deals-layout{display:grid;grid-template-columns:280px 1fr;gap:20px;align-items:start}
+.deals-sp-list{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow);position:sticky;top:0}
+.deals-sp-item{display:flex;align-items:center;gap:12px;padding:1rem;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.2s}
+.deals-sp-item:last-child{border-bottom:none}
+.deals-sp-item:hover{background:var(--surface)}
+.deals-sp-item.active{background:var(--blue-light);border-left:4px solid var(--blue)}
+.deals-sp-item.all-item.active{border-left:4px solid var(--teal)}
+
+.proof-preview { width: 150px; height: 150px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-md); margin-top: 8px; display: block; box-shadow: var(--shadow); }
+
+@media(max-width:1024px){
+  .app{flex-direction:column}
+  .sidebar{width:100%;height:auto;flex-direction:row;align-items:center;justify-content:space-between;padding:0 1rem;background:var(--sidebar-bg)}
+  .sidebar .logo{border-bottom:none;padding:1rem 0}
+  .nav-tabs{flex-direction:row;padding:0;overflow-x:auto;gap:0;margin-left:auto}
+  .nav-tab{padding:1rem;border-left:none;border-bottom:3px solid transparent;white-space:nowrap}
+  .nav-tab.active{border-left-color:transparent;border-bottom-color:var(--blue-mid)}
+  .content-wrapper{overflow-y:auto}
+  .two-col,.two-col-wide,.deals-layout{grid-template-columns:1fr}
+  .team-grid-a{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:640px){
+  .main{padding:1rem}
+  .kpi-strip{grid-template-columns:repeat(2,1fr)}
+  .team-grid-a{grid-template-columns:1fr}
+  .fgrid{grid-template-columns:1fr}
+  .si{width:100%}
+  .filters{width:100%}
+}
+</style>
+</head>
+<body>
+
+<div id="login-page" class="login-wrap">
+  <div class="login-card">
+    <div class="login-logo">
+      <img src="https://tenagacekap.com.my/wp-content/uploads/2019/05/tenaga-log-icon.png" alt="TCM">
+      <h1><span>Tenaga Cekap</span> CRM</h1>
+      <p>Sales & Lead Management System</p>
+    </div>
+    <div class="login-tabs">
+      <div class="login-tab active" onclick="setLoginRole('master_admin')" id="ltab-master_admin">Master Admin</div>
+      <div class="login-tab" onclick="setLoginRole('admin')" id="ltab-admin">Admin</div>
+      <div class="login-tab" onclick="setLoginRole('salesperson')" id="ltab-salesperson">Salesperson</div>
+    </div>
+    <div id="login-error" class="login-error"></div>
+    <div class="fl"><label>Email</label><input id="login-email" type="email" placeholder="you@company.com" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="fl"><label>Password</label><input id="login-password" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <label class="remember-row"><input type="checkbox" id="remember-me"> Remember me</label>
+    <button class="login-btn" id="login-btn" onclick="doLogin()">Sign In</button>
+    <div style="text-align:center;margin-top:12px"><a href="#" onclick="showForgotPassword()" style="font-size:12px;color:var(--blue);text-decoration:none">Forgot password?</a></div>
+  </div>
+</div>
+
+<div id="forgot-modal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:300;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(2px)">
+  <div style="background:#fff;border-radius:var(--radius-xl);box-shadow:var(--shadow-lg);width:100%;max-width:380px;padding:2rem">
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div style="font-size:36px;margin-bottom:8px">🔒</div>
+      <h2 style="font-size:18px;font-weight:700;margin-bottom:4px">Reset Password</h2>
+      <p style="font-size:13px;color:var(--muted)">Enter your email to receive a reset link.</p>
+    </div>
+    <div id="forgot-success" style="display:none;background:var(--teal-bg);border:1px solid #a3e9c8;border-radius:var(--radius);padding:12px;font-size:13px;color:#166534;margin-bottom:1rem;text-align:center">✅ Reset link sent! Check your inbox.</div>
+    <div id="forgot-error" style="display:none;background:#fee2e2;border-radius:var(--radius);padding:10px;font-size:13px;color:#991b1b;margin-bottom:1rem"></div>
+    <div class="fl"><label>Email Address</label><input id="forgot-email" type="email" placeholder="your@email.com" onkeydown="if(event.key==='Enter')sendResetEmail()"></div>
+    <button onclick="sendResetEmail()" id="forgot-btn" style="width:100%;padding:10px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;margin-bottom:12px">Send Reset Link</button>
+    <button onclick="hideForgotPassword()" style="width:100%;padding:8px;background:transparent;color:var(--text);border:1px solid var(--border-md);border-radius:var(--radius);font-size:13px;cursor:pointer">Back to Sign In</button>
+  </div>
+</div>
+
+<div id="app" class="app">
+  <aside class="sidebar">
+    <div class="logo">
+      <img src="https://tenagacekap.com.my/wp-content/uploads/2019/05/tenaga-log-icon.png" alt="TCM">
+      <span><b>TCM</b> CRM</span>
+    </div>
+    <nav class="nav-tabs" id="nav-tabs"></nav>
+  </aside>
+
+  <div class="content-wrapper">
+    <header class="top-header">
+      <div class="header-title">Workspace</div>
+      <div class="topbar-right">
+        <span id="topbar-role-chip"></span>
+        <button class="notif-btn" onclick="toggleNotifPanel()" id="notif-btn">🔔<span class="notif-badge" id="notif-badge"></span></button>
+        <div class="topbar-avatar" onclick="switchTab('profile')" id="topbar-avatar" title="Profile"></div>
+        <button class="btn btn-secondary btn-sm" onclick="doLogout()">Sign out</button>
+      </div>
+    </header>
+
+    <div class="notif-panel" id="notif-panel">
+      <div class="notif-panel-head">
+        <span style="font-size:14px;font-weight:700;color:var(--text)">Notifications</span>
+        <button class="btn btn-secondary btn-sm" onclick="markAllRead()">Mark all read</button>
+      </div>
+      <div class="notif-list" id="notif-list"><div class="empty">No notifications yet.</div></div>
+    </div>
+
+    <main class="main">
+      <div id="view-dashboard" class="view active">
+        <div class="kpi-strip" id="dash-kpi-strip">
+          <div class="kpi-cell"><div class="kpi-cell-n" style="color:var(--blue)" id="kpi-total">0</div><div class="kpi-cell-l">Total Leads</div><div class="kpi-cell-bar" style="background:var(--blue)"></div></div>
+          <div class="kpi-cell"><div class="kpi-cell-n" style="color:var(--teal)" id="kpi-won">0</div><div class="kpi-cell-l">Won</div><div class="kpi-cell-bar" style="background:var(--teal)"></div></div>
+          <div class="kpi-cell"><div class="kpi-cell-n" style="color:#dc2626" id="kpi-lost">0</div><div class="kpi-cell-l">Lost</div><div class="kpi-cell-bar" style="background:#dc2626"></div></div>
+          <div class="kpi-cell"><div class="kpi-cell-n" style="color:#d97706" id="kpi-pending">0</div><div class="kpi-cell-l">Pending</div><div class="kpi-cell-bar" style="background:#d97706"></div></div>
+          <div class="kpi-cell"><div class="kpi-cell-n" style="color:var(--teal)" id="kpi-rate">0%</div><div class="kpi-cell-l">Close Rate</div><div class="kpi-cell-bar" style="background:var(--teal)"></div></div>
+        </div>
+        <div class="two-col-wide">
+          <div class="panel-card">
+            <div class="panel-head">
+              <span class="panel-head-title">Recent Leads</span>
+              <button class="btn btn-secondary btn-sm" onclick="switchTab('leads')">View all →</button>
+            </div>
+            <div id="dash-leads-panel"><div class="empty">No leads yet.</div></div>
+          </div>
+          <div class="panel-card">
+            <div class="panel-head">
+              <span class="panel-head-title">Team Performance</span>
+              <button class="btn btn-secondary btn-sm" onclick="switchTab('salespersons')">View team →</button>
+            </div>
+            <div id="dash-team-panel"><div class="empty">No team members yet.</div></div>
+          </div>
+        </div>
+        <div class="two-col">
+          <div class="panel-card">
+            <div class="panel-head"><span class="panel-head-title">Active Tenders</span><button class="btn btn-secondary btn-sm" onclick="switchTab('tender')">View all →</button></div>
+            <div id="dash-tenders-panel"><div class="empty">No tenders yet.</div></div>
+          </div>
+          <div class="panel-card">
+            <div class="panel-head"><span class="panel-head-title">Follow-up Needed</span><button class="btn btn-secondary btn-sm" onclick="switchTab('retarget')">View all →</button></div>
+            <div id="dash-followup-panel"><div class="empty">All leads are up to date.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="view-leads" class="view">
+        <div class="sec-head">
+          <div><div class="sec-title">Lead Management</div><div class="sec-sub">Track and update your sales pipeline</div></div>
+          <div style="display:flex;gap:12px;align-items:center">
+            <span id="lead-count" style="font-size:12px;color:var(--muted);font-weight:600"></span>
+            <button class="btn btn-primary" onclick="openLeadModal()">+ Add Lead</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="table-header">
+            <div class="filters">
+              <div class="sw">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input class="si" id="lead-search" type="text" placeholder="Search company or PIC..." oninput="renderLeads()">
+              </div>
+              <select class="fs" id="lead-fstatus" onchange="renderLeads()"><option value="">All Status</option><option>New</option><option>Pending</option><option>Won</option><option>Lost</option></select>
+              <select class="fs" id="lead-fsales" onchange="renderLeads()"><option value="">All Salesperson</option></select>
+            </div>
+          </div>
+          <div class="overflow">
+            <table>
+              <thead><tr><th>Company</th><th>Industry</th><th>PIC</th><th>Contact</th><th>Assigned To</th><th>Visit</th><th>Status</th><th>Pax</th><th>Price (RM)</th><th>Quotation</th><th>Actions</th></tr></thead>
+              <tbody id="leads-tbody"></tbody>
+            </table>
+            <div id="leads-empty" class="empty" style="display:none">No leads found.</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="view-deals" class="view">
+        <div class="sec-head">
+          <div><div class="sec-title">Closed Deals Pipeline</div><div class="sec-sub">Review monthly performance metrics</div></div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Filter Month:</span>
+            <select class="fs" id="deals-month-filter" onchange="renderDealsContent()" style="min-width:180px">
+              <option value="">All Months</option>
+            </select>
+            <button class="btn btn-secondary btn-sm" onclick="sv('deals-month-filter','');renderDealsContent()">Clear</button>
+          </div>
+        </div>
+        <div class="kpi-strip" style="grid-template-columns:repeat(4,1fr)" id="deals-kpi-strip">
+          <div class="kpi-cell"><div class="kpi-cell-n" style="color:var(--teal)" id="dkpi-won">0</div><div class="kpi-cell-l">Total Won</div><div class="kpi-cell-bar" style="background:var(--teal)"></div></div>
+          <div class="kpi-cell"><div class="kpi-cell-n" style="color:#dc2626" id="dkpi-lost">0</div><div class="kpi-cell-l">Total Lost</div><div class="kpi-cell-bar" style="background:#dc2626"></div></div>
+          <div class="kpi-cell"><div class="kpi-cell-n" style="color:var(--teal);font-size:24px" id="dkpi-val">RM 0</div><div class="kpi-cell-l">Won Value</div><div class="kpi-cell-bar" style="background:var(--teal)"></div></div>
+          <div class="kpi-cell"><div class="kpi-cell-n" style="color:var(--blue)" id="dkpi-rate">0%</div><div class="kpi-cell-l">Close Rate</div><div class="kpi-cell-bar" style="background:var(--blue)"></div></div>
+        </div>
+        <div class="deals-layout">
+          <div>
+            <div class="deals-sp-list" id="deals-sp-list">
+              <div class="panel-head" style="background:var(--surface)"><span class="panel-head-title">Salespersons</span></div>
+            </div>
+          </div>
+          <div id="deals-by-sp"></div>
+        </div>
+      </div>
+
+      <div id="view-tender" class="view">
+        <div class="sec-head">
+          <div><div class="sec-title">Tender Management</div><div class="sec-sub">Track tenders, pricing and BQ documents</div></div>
+          <div style="display:flex;gap:12px;align-items:center">
+             <span id="tender-count" style="font-size:12px;color:var(--muted);font-weight:600"></span>
+             <button class="btn btn-primary" onclick="openTenderModal()">+ Add Tender</button>
+          </div>
+        </div>
+        <div class="metrics-grid" id="tender-metrics"></div>
+        <div class="card">
+          <div class="table-header">
+            <div class="filters">
+              <div class="sw">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input class="si" id="tender-search" type="text" placeholder="Search company..." oninput="renderTenders()">
+              </div>
+              <select class="fs" id="tender-fstatus" onchange="renderTenders()"><option value="">All Status</option><option>Ongoing</option><option>Won</option><option>Lost</option></select>
+            </div>
+          </div>
+          <div class="overflow">
+            <table>
+              <thead><tr><th>Company</th><th>Project</th><th>PIC</th><th>Assigned To</th><th>Our Price (RM)</th><th>Awarded (RM)</th><th>Submission Date</th><th>Status</th><th>Submitted</th><th>BQ File</th><th>Actions</th></tr></thead>
+              <tbody id="tenders-tbody"></tbody>
+            </table>
+            <div id="tenders-empty" class="empty" style="display:none">No tenders yet.</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="view-retarget" class="view">
+        <div class="sec-head">
+          <div><div class="sec-title">Retarget Contacts</div><div class="sec-sub">Follow up with lost or pending leads via WhatsApp</div></div>
+          <select class="fs" id="retarget-filter" onchange="renderRetarget()"><option value="Lost">Lost deals</option><option value="Pending">Pending</option><option value="All">All contacts</option></select>
+        </div>
+        <div id="retarget-list"></div>
+        <div id="retarget-empty" class="empty" style="display:none">No contacts to retarget.</div>
+      </div>
+
+      <div id="view-salespersons" class="view">
+        <div class="kpi-strip" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.5rem" id="team-kpi-strip">
+          <div class="kpi-cell"><div class="kpi-cell-n" style="color:var(--blue)" id="tkpi-members">0</div><div class="kpi-cell-l">Team Members</div><div class="kpi-cell-bar" style="background:var(--blue)"></div></div>
+          <div class="kpi-cell"><div class="kpi-cell-n" style="color:var(--teal)" id="tkpi-won">0</div><div class="kpi-cell-l">Total Won</div><div class="kpi-cell-bar" style="background:var(--teal)"></div></div>
+          <div class="kpi-cell"><div class="kpi-cell-n" style="color:#d97706" id="tkpi-active">0</div><div class="kpi-cell-l">Active Leads</div><div class="kpi-cell-bar" style="background:#d97706"></div></div>
+          <div class="kpi-cell"><div class="kpi-cell-n" style="color:var(--teal);font-size:24px" id="tkpi-val">RM 0</div><div class="kpi-cell-l">Total Won Value</div><div class="kpi-cell-bar" style="background:var(--teal)"></div></div>
+        </div>
+        <div class="sec-head">
+          <div><div class="sec-title">Team Roster</div><div class="sec-sub">Manage sales staff and view individual metrics</div></div>
+          <button class="btn btn-primary" onclick="openAddSPModal()">+ Add Member</button>
+        </div>
+        <div class="team-grid-a" id="sp-grid"></div>
+        <div id="sp-empty" class="empty" style="display:none">No team members yet.</div>
+      </div>
+
+      <div id="view-profile" class="view">
+        <div class="sec-head">
+           <div><div class="sec-title">Account Settings</div><div class="sec-sub">Update your personal details and security</div></div>
+        </div>
+        <div class="panel-card" style="margin-bottom:1.5rem">
+          <div style="padding:2rem;display:flex;align-items:center;gap:1.5rem;border-bottom:1px solid var(--border);background:#fff">
+            <div class="sp-av" id="profile-avatar-big" style="cursor:pointer; flex-shrink:0;" onclick="document.getElementById('profile-pic-input').click()" title="Click to change photo"></div>
+            <input type="file" id="profile-pic-input" accept="image/*" style="display:none" onchange="handleProfilePic(this)">
+            <div style="flex:1">
+              <div style="font-size:22px;font-weight:700;color:var(--text)" id="profile-name-display"></div>
+              <div style="font-size:14px;color:var(--muted);margin-top:4px" id="profile-email-display"></div>
+              <div style="margin-top:8px" id="profile-role-chip-display"></div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:6px">Click photo to change</div>
+              <div style="font-size:12px;color:var(--hint)">Max 2MB · JPG/PNG</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr)" id="profile-stats-strip">
+            <div class="kpi-cell" style="padding:1.25rem"><div class="kpi-cell-n" style="color:var(--teal);font-size:24px" id="pkpi-won">0</div><div class="kpi-cell-l">Deals Won</div><div class="kpi-cell-bar" style="background:var(--teal)"></div></div>
+            <div class="kpi-cell" style="padding:1.25rem"><div class="kpi-cell-n" style="color:#d97706;font-size:24px" id="pkpi-active">0</div><div class="kpi-cell-l">Active Leads</div><div class="kpi-cell-bar" style="background:#d97706"></div></div>
+            <div class="kpi-cell" style="padding:1.25rem"><div class="kpi-cell-n" style="color:var(--teal);font-size:20px" id="pkpi-val">RM 0</div><div class="kpi-cell-l">Won Value</div><div class="kpi-cell-bar" style="background:var(--teal)"></div></div>
+          </div>
+        </div>
+        <div class="profile-grid-a">
+          <div>
+            <div class="panel-card">
+              <div class="panel-head"><span class="panel-head-title">Personal Information</span></div>
+              <div style="padding:1.5rem">
+                <div class="fgrid">
+                  <div class="fg full"><label class="flabel">Full Name</label><input id="profile-name" type="text"></div>
+                  <div class="fg full"><label class="flabel">Phone / WhatsApp</label><input id="profile-phone" type="tel" placeholder="+60 1X-XXX XXXX"></div>
+                  <div class="fg full"><label class="flabel">Email (cannot change)</label><input id="profile-email" type="email" disabled style="background:var(--surface);color:var(--muted);cursor:not-allowed"></div>
+                </div>
+                <div style="margin-top:1.5rem;display:flex;justify-content:flex-end"><button class="btn btn-primary" onclick="saveProfile()">Save Changes</button></div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:1.5rem">
+            <div class="panel-card">
+              <div class="panel-head"><span class="panel-head-title">Security Settings</span></div>
+              <div style="padding:1.5rem">
+                <div class="fg" style="margin-bottom:12px"><label class="flabel">New Password</label><input id="new-password" type="password" placeholder="Min 6 characters"></div>
+                <div class="fg" style="margin-bottom:16px"><label class="flabel">Confirm Password</label><input id="confirm-password" type="password" placeholder="Repeat password"></div>
+                <div style="display:flex;justify-content:flex-end"><button class="btn btn-primary" onclick="changePassword()">Update Your Password</button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="lead-modal">
+  <div class="modal">
+    <div class="modal-header"><h2 class="modal-title" id="lead-modal-title">Add New Lead</h2><button class="btn-icon" onclick="closeLeadModal()">✕</button></div>
+    <div class="modal-body">
+      <div id="admin-fields">
+        <div class="section-sep">Client Information</div>
+        <div class="fgrid">
+          <div class="fg"><label class="flabel">Company Name *</label><input id="l-company" type="text" placeholder="e.g. CIMB Bank Berhad"></div>
+          <div class="fg"><label class="flabel">Industry *</label>
+            <select id="l-industry" onchange="toggleOtherIndustry()">
+              <option value="">Select industry...</option>
+              <option>Office / Corporate</option><option>Shopping Mall</option><option>Condominium / Residential</option>
+              <option>Hospital / Healthcare</option><option>Factory / Warehouse</option><option>School / University</option>
+              <option>Government</option><option>Hotel / Hospitality</option><option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="fg full" id="other-industry-group" style="display:none">
+            <label class="flabel">Specify Industry</label>
+            <input id="l-industry-other" type="text" placeholder="e.g. Logistics, F&B, Retail...">
+          </div>
+          <div class="fg"><label class="flabel">PIC Name *</label><input id="l-pic" type="text" placeholder="Contact person name"></div>
+          <div class="fg"><label class="flabel">PIC Phone / WhatsApp *</label><input id="l-phone" type="tel" placeholder="+60 1X-XXX XXXX"></div>
+          <div class="fg full"><label class="flabel">PIC Email</label><input id="l-email" type="email" placeholder="pic@company.com"></div>
+          <div class="fg full" id="assign-to-group"><label class="flabel">Assign To Salesperson</label><select id="l-assigned-to"><option value="">Unassigned</option></select></div>
+        </div>
+      </div>
+      <div id="sp-fields" style="display:none">
+        <div class="info-box" id="sp-lead-info-box">📋 Fill in the details below after your site visit or client meeting.</div>
+        <div class="fgrid">
+          <div class="fg"><label class="flabel">Site Visit Date (optional)</label><input id="l-visit" type="date"></div>
+          <div class="fg"><label class="flabel">Deal Status</label>
+            <select id="l-status" onchange="toggleLostProof()">
+              <option value="New">New</option><option value="Pending">Pending</option>
+              <option value="Won">Won ✓</option><option value="Lost">Lost ✗</option>
+            </select>
+          </div>
+          <div class="fg"><label class="flabel">Service Provided</label>
+            <select id="l-service" onchange="toggleOtherService()">
+              <option value="">Select...</option><option>Commercial Housekeeping</option><option>Office Housekeeping</option>
+              <option>Condominium Housekeeping</option><option>Factory Housekeeping</option><option>Facade Cleaning</option>
+              <option>Carpet Cleaning</option><option>Marble Polishing</option><option>High-Pressure Water Jet</option>
+              <option>Pipeline / Drainage Cleaning</option><option>Labour Supply</option><option>Landscaping</option>
+              <option>Septic Tank Cleaning</option><option value="Other">Other / Multiple Services</option>
+            </select>
+          </div>
+          <div class="fg full" id="other-service-group" style="display:none">
+            <label class="flabel">Specify Service(s)</label>
+            <input id="l-service-other" type="text" placeholder="e.g. Pest Control, Disinfection...">
+          </div>
+          <div class="fg"><label class="flabel">No. of Pax</label><input id="l-pax" type="number" placeholder="e.g. 3" min="0"></div>
+          <div class="fg full"><label class="flabel">Price Quoted (RM)</label><input id="l-price" type="number" placeholder="e.g. 5000.00"></div>
+          <div class="fg full"><label class="flabel">Notes / Call Log</label><textarea id="l-notes" placeholder="Site visit notes, client feedback..."></textarea></div>
+          <div class="fg full">
+            <label class="flabel">Quotation File (PDF/Image/Word — max 4MB)</label>
+            <div class="upload-zone" onclick="document.getElementById('l-quot-file').click()">📎 Click to upload quotation<input id="l-quot-file" type="file" accept=".pdf,.png,.jpg,.jpeg,.docx,.xlsx" style="display:none" onchange="handleLeadFile(this,'quot')"></div>
+            <div id="l-quot-preview"></div>
+          </div>
+          <div class="fg full" id="lost-proof-section" style="display:none">
+            <label class="flabel">Lost Proof (Image only — Auto Cropped to 1:1 Square)</label>
+            <div class="upload-zone" style="border-color:#ffc9c9;background:#fff5f5" onclick="document.getElementById('l-proof-file').click()">📋 Upload Rejection Proof<input id="l-proof-file" type="file" accept="image/*" style="display:none" onchange="handleLeadFile(this,'proof')"></div>
+            <div id="l-proof-preview"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeLeadModal()">Cancel</button>
+      <button class="btn btn-primary" id="lead-save-btn" onclick="saveLead()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="tender-modal">
+  <div class="modal">
+    <div class="modal-header"><h2 class="modal-title" id="tender-modal-title">Add New Tender</h2><button class="btn-icon" onclick="closeTenderModal()">✕</button></div>
+    <div class="modal-body">
+      <div id="t-admin-fields">
+        <div class="section-sep">Client Information</div>
+        <div class="fgrid">
+          <div class="fg"><label class="flabel">Company Name *</label><input id="t-company" type="text" placeholder="Tender issuer / client"></div>
+          <div class="fg"><label class="flabel">Project Name</label><input id="t-project" type="text" placeholder="Project / tender title"></div>
+          <div class="fg"><label class="flabel">Industry</label>
+            <select id="t-industry" onchange="toggleOtherTenderIndustry()">
+              <option value="">Select...</option><option>Office / Corporate</option><option>Shopping Mall</option>
+              <option>Condominium / Residential</option><option>Hospital / Healthcare</option><option>Factory / Warehouse</option>
+              <option>School / University</option><option>Government</option><option>Hotel / Hospitality</option><option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="fg" id="t-other-industry-group" style="display:none"><label class="flabel">Specify Industry</label><input id="t-industry-other" type="text" placeholder="e.g. Logistics, F&B..."></div>
+          
+          <div class="fg"><label class="flabel">Service Provided</label>
+            <select id="t-service" onchange="toggleTenderOtherService()">
+              <option value="">Select...</option><option>Commercial Housekeeping</option><option>Office Housekeeping</option>
+              <option>Condominium Housekeeping</option><option>Factory Housekeeping</option><option>Facade Cleaning</option>
+              <option>Carpet Cleaning</option><option>Marble Polishing</option><option>High-Pressure Water Jet</option>
+              <option>Pipeline / Drainage Cleaning</option><option>Labour Supply</option><option>Landscaping</option>
+              <option>Septic Tank Cleaning</option><option value="Other">Other / Multiple Services</option>
+            </select>
+          </div>
+          <div class="fg full" id="t-other-service-group" style="display:none">
+            <label class="flabel">Specify Service(s)</label>
+            <input id="t-service-other" type="text" placeholder="e.g. Pest Control, Disinfection...">
+          </div>
+
+          <div class="fg"><label class="flabel">PIC Name</label><input id="t-pic" type="text" placeholder="Procurement contact"></div>
+          <div class="fg"><label class="flabel">PIC Phone / WhatsApp</label><input id="t-pic-phone" type="tel" placeholder="+60 1X-XXX XXXX"></div>
+          <div class="fg full"><label class="flabel">PIC Email</label><input id="t-pic-email" type="email" placeholder="procurement@company.com"></div>
+          <div class="fg full"><label class="flabel">Assign To Salesperson</label><select id="t-assigned-to"><option value="">Unassigned</option></select></div>
+        </div>
+      </div>
+      <div id="t-sp-fields">
+        <div class="section-sep">Tender Details</div>
+        <div class="fgrid">
+          <div class="fg"><label class="flabel">Status</label>
+            <select id="t-status" onchange="toggleTenderAwarded()"><option value="Ongoing">Ongoing</option><option value="Won">Won ✓</option><option value="Lost">Lost ✗</option></select>
+          </div>
+          <div class="fg"><label class="flabel">Submission Date</label><input id="t-submit-date" type="date"></div>
+          <div class="fg"><label class="flabel">Our Price / Budget (RM)</label><input id="t-our-price" type="number" placeholder="e.g. 150000"></div>
+          <div class="fg" id="t-awarded-group" style="display:none"><label class="flabel">Awarded Price (RM) — competitor's price</label><input id="t-awarded-price" type="number" placeholder="Winning price"></div>
+          <div class="fg"><label class="flabel">Result Date</label><input id="t-result-date" type="date"></div>
+          <div class="fg full"><label class="flabel">Notes / Scope of Work</label><textarea id="t-notes" placeholder="Scope of work, requirements, remarks..."></textarea></div>
+          <div class="fg full">
+            <label class="flabel">BQ File — Bill of Quantities (max 4MB)</label>
+            <div class="upload-zone" onclick="document.getElementById('t-bq-file').click()">📄 Upload BQ document<input id="t-bq-file" type="file" accept=".pdf,.png,.jpg,.jpeg,.docx,.xlsx,.xls" style="display:none" onchange="handleTenderFile(this)"></div>
+            <div id="t-bq-preview"></div>
+          </div>
+          
+          <div class="section-sep full">Submission Proof</div>
+          <div class="fg full" style="margin-bottom:8px">
+            <label class="flabel" style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+              <input type="checkbox" id="t-submitted" onchange="toggleTenderProof()" style="width:16px;height:16px;"> 
+              <span style="font-size:13px; font-weight:600; color:var(--text);">Mark as Submitted</span>
+            </label>
+          </div>
+          <div class="fg full" id="tender-proof-group" style="display:none;">
+             <label class="flabel">Submission Proof (Image only — Auto Cropped to 1:1 Square)</label>
+             <div class="upload-zone" style="border-color:#b2e4d2;background:#e8f8f2" onclick="document.getElementById('t-proof-file').click()">📸 Upload Submission Proof<input id="t-proof-file" type="file" accept="image/*" style="display:none" onchange="handleTenderProofFile(this)"></div>
+             <div id="t-proof-preview"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeTenderModal()">Cancel</button>
+      <button class="btn btn-primary" id="tender-save-btn" onclick="saveTender()">Save Tender</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="sp-modal">
+  <div class="modal modal-sm">
+    <div class="modal-header"><h2 class="modal-title">Add Team Member</h2><button class="btn-icon" onclick="closeSPModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="fg" style="margin-bottom:10px"><label class="flabel">Full Name *</label><input id="sp-name" type="text" placeholder="Full name"></div>
+      <div class="fg" style="margin-bottom:10px"><label class="flabel">Email *</label><input id="sp-email" type="email" placeholder="email@company.com"></div>
+      <div class="fg" style="margin-bottom:10px"><label class="flabel">Phone / WhatsApp</label><input id="sp-phone" type="tel" placeholder="+60 1X-XXX XXXX"></div>
+      <div class="fg" style="margin-bottom:10px"><label class="flabel">Role</label><select id="sp-role"><option value="salesperson">Salesperson</option><option value="admin">Admin</option></select></div>
+      <div class="fg"><label class="flabel">Password *</label><input id="sp-password" type="password" placeholder="Min 6 characters"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeSPModal()">Cancel</button>
+      <button class="btn btn-primary" id="sp-save-btn" onclick="saveSalesperson()">Create Account</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="detail-modal">
+  <div class="modal modal-sm">
+    <div class="modal-header"><h2 class="modal-title" id="detail-title">Detail</h2><button class="btn-icon" onclick="closeDetail()">✕</button></div>
+    <div class="modal-body" id="detail-body"></div>
+    <div class="modal-footer" style="justify-content:space-between">
+      <button class="btn btn-secondary" onclick="closeDetail()">Close</button>
+      <button class="btn btn-primary" id="detail-edit-btn">Edit Record</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SB='https://izogplowfljnrnokooaf.supabase.co';
+const ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6b2dwbG93ZmxqbnJub2tvb2FmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1OTkyNzksImV4cCI6MjA5NjE3NTI3OX0.sA8gJ5V7yE5yKtxjh8U19CzltOsBuD4PbeS_r6YRu3o';
+let currentUser=null,currentProfile=null,leads=[],tenders=[],profiles=[],notifications=[];
+let editLid=null,editTid=null,pQuot=null,pProof=null,pBQ=null,pSubProof=null,loginRole='master_admin';
+
+// Supabase Storage API Functions
+async function uploadToSupabase(file, folder) {
+  const ext = file.name.split('.').pop() || 'file';
+  const path = `${folder}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+  const r = await fetch(`${SB}/storage/v1/object/tcm-files/${path}`, {
+    method: 'POST',
+    headers: { 'apikey': ANON_KEY, 'Authorization': 'Bearer ' + currentUser.token, 'Content-Type': file.type || 'application/octet-stream' },
+    body: file
+  });
+  if (!r.ok) throw new Error('File upload failed');
+  return path;
+}
+
+function getFileUrl(path) {
+  if (!path) return '';
+  if (path.startsWith('data:')) return path; // Support old database base64 entries
+  return `${SB}/storage/v1/object/public/tcm-files/${path}`;
+}
+
+function openStoredFile(path) {
+  const url = getFileUrl(path);
+  if (url) window.open(url, '_blank');
+}
+
+function saveStoredFile(path, filename) {
+  const url = getFileUrl(path);
+  if (!url) return;
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename || 'download';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function getH(t){return{'apikey':ANON_KEY,'Authorization':'Bearer '+(t||ANON_KEY),'Content-Type':'application/json','Prefer':'return=representation'};}
+async function api(m,url,body,t){const o={method:m,headers:getH(t)};if(body)o.body=JSON.stringify(body);const r=await fetch(url,o);if(!r.ok)throw new Error(await r.text());return m==='DELETE'?null:r.json();}
+
+function setLoginRole(r){loginRole=r;['master_admin','admin','salesperson'].forEach(x=>document.getElementById('ltab-'+x).classList.toggle('active',x===r));}
+async function doLogin(){
+  const email=gv('login-email'),pw=gv('login-password');
+  if(!email||!pw){showLE('Please enter email and password.');return;}
+  const btn=document.getElementById('login-btn');btn.textContent='Signing in...';btn.disabled=true;hideLE();
+  try{
+    const r=await fetch(`${SB}/auth/v1/token?grant_type=password`,{method:'POST',headers:{'apikey':ANON_KEY,'Content-Type':'application/json'},body:JSON.stringify({email,password:pw})});
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.error_description||d.msg||'Invalid credentials');
+    const token=d.access_token,uid=d.user.id;
+    const pr=await fetch(`${SB}/rest/v1/profiles?id=eq.${uid}&select=*`,{headers:getH(token)});
+    const pa=await pr.json();
+    if(!pa.length)throw new Error('Profile not found. Contact your administrator.');
+    const prof=pa[0];
+    if(prof.role!==loginRole)throw new Error(`This account is not a ${loginRole.replace('_',' ')}. Please select the correct tab.`);
+    if(!prof.is_active)throw new Error('This account has been deactivated.');
+    const rememberMe=document.getElementById('remember-me').checked;
+    const sess={token,userId:uid,profile:prof,expiry:Date.now()+(rememberMe?30*24*3600000:8*3600000)};
+    if(document.getElementById('remember-me').checked)localStorage.setItem('tcm_sess',JSON.stringify(sess));
+    else sessionStorage.setItem('tcm_sess',JSON.stringify(sess));
+    await startApp(token,prof);
+  }catch(e){showLE(e.message);}
+  finally{btn.textContent='Sign In';btn.disabled=false;}
+}
+function showLE(m){const e=document.getElementById('login-error');e.textContent=m;e.style.display='block';}
+function hideLE(){document.getElementById('login-error').style.display='none';}
+function showForgotPassword(){document.getElementById('forgot-modal').style.display='flex';document.getElementById('forgot-success').style.display='none';document.getElementById('forgot-error').style.display='none';sv('forgot-email',gv('login-email'));}
+function hideForgotPassword(){document.getElementById('forgot-modal').style.display='none';}
+async function sendResetEmail(){
+  const email=gv('forgot-email');
+  if(!email){const e=document.getElementById('forgot-error');e.textContent='Please enter your email.';e.style.display='block';return;}
+  const btn=document.getElementById('forgot-btn');btn.textContent='Sending...';btn.disabled=true;
+  document.getElementById('forgot-error').style.display='none';
+  try{
+    const r=await fetch(`${SB}/auth/v1/recover`,{method:'POST',headers:{'apikey':ANON_KEY,'Content-Type':'application/json'},body:JSON.stringify({email})});
+    document.getElementById('forgot-success').style.display='block';
+    btn.textContent='Resend Link';btn.disabled=false;
+  }catch(e){const er=document.getElementById('forgot-error');er.textContent=e.message;er.style.display='block';btn.textContent='Send Reset Link';btn.disabled=false;}
+}
+async function checkSession(){
+  const s=localStorage.getItem('tcm_sess')||sessionStorage.getItem('tcm_sess');
+  if(!s)return;
+  try{const sess=JSON.parse(s);if(Date.now()>sess.expiry){clearSess();return;}
+    if(localStorage.getItem('tcm_sess')){const updated={...sess,expiry:Date.now()+30*24*3600000};localStorage.setItem('tcm_sess',JSON.stringify(updated));}
+    const r=await fetch(`${SB}/rest/v1/profiles?id=eq.${sess.userId}&select=*`,{headers:getH(sess.token)});
+    const a=await r.json();if(!a.length){clearSess();return;}
+    await startApp(sess.token,a[0]);
+  }catch(e){clearSess();}
+}
+function clearSess(){localStorage.removeItem('tcm_sess');sessionStorage.removeItem('tcm_sess');}
+async function doLogout(){clearSess();document.getElementById('app').style.display='none';document.getElementById('login-page').style.display='flex';currentUser=null;currentProfile=null;}
+async function startApp(token,prof){
+  currentUser={token};currentProfile=prof;
+  document.getElementById('login-page').style.display='none';
+  document.getElementById('app').style.display='flex';
+  buildNav();renderTopbarProfile();
+  await loadAll();checkPendingReminders();
+}
+
+function buildNav(){
+  const role=currentProfile.role;
+  const tabs=[['dashboard','📊 Dashboard'],['leads','👥 Leads']];
+  if(role !== 'salesperson'){
+     tabs.push(['deals','🏆 Deals']);
+     tabs.push(['salespersons','👤 Team']);
+  }
+  tabs.push(['tender','📋 Tenders'],['retarget','🎯 Retarget'],['profile','⚙ Profile']);
+  document.getElementById('nav-tabs').innerHTML=tabs.map(([id,label])=>`<div class="nav-tab" onclick="switchTab('${id}')" id="tab-${id}">${label}</div>`).join('');
+  document.getElementById('tab-dashboard').classList.add('active');
+}
+function renderTopbarProfile(){
+  const p=currentProfile;
+  const rmap={master_admin:['Master Admin','rc-master'],admin:['Admin','rc-admin'],salesperson:['Salesperson','rc-sales']};
+  const[rl,rc]=rmap[p.role]||['User','rc-sales'];
+  document.getElementById('topbar-role-chip').innerHTML=`<span class="role-chip ${rc}">${rl}</span>`;
+  const av=document.getElementById('topbar-avatar');
+  if(p.avatar_data)av.innerHTML=`<img src="${p.avatar_data}" alt="">`;else av.textContent=(p.full_name||'U')[0].toUpperCase();
+}
+function switchTab(tab){
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const te=document.getElementById('tab-'+tab);if(te)te.classList.add('active');
+  const ve=document.getElementById('view-'+tab);if(ve)ve.classList.add('active');
+  if(tab==='profile')renderProfilePage();
+  if(tab==='salespersons')renderSalespersons();
+  if(tab==='deals')renderDeals();
+  if(tab==='tender')renderTenders();
+  if(tab==='retarget')renderRetarget();
+  if(tab==='leads')renderLeads();
+  document.getElementById('notif-panel').classList.remove('open');
+}
+
+async function loadAll(){
+  const token=currentUser.token,role=currentProfile.role,uid=currentProfile.id;
+  try{
+    const lUrl=role==='salesperson'?`${SB}/rest/v1/leads?assigned_to=eq.${uid}&order=created_at.desc&limit=200`:`${SB}/rest/v1/leads?order=created_at.desc&limit=200`;
+    const tUrl=role==='salesperson'?`${SB}/rest/v1/tenders?assigned_to=eq.${uid}&order=created_at.desc&limit=200`:`${SB}/rest/v1/tenders?order=created_at.desc&limit=200`;
+    [leads,tenders,profiles]=await Promise.all([api('GET',lUrl,null,token),api('GET',tUrl,null,token),api('GET',`${SB}/rest/v1/profiles?is_active=eq.true&order=full_name.asc`,null,token)]);
+    await loadNotifications();populateFilters();
+    
+    renderDashboard();renderLeads();
+    if(role !== 'salesperson') renderDeals();
+    renderTenders();renderRetarget();
+  }catch(e){toast('Error loading data: '+e.message,'error');}
+}
+
+async function loadNotifications(){
+  try{notifications=await api('GET',`${SB}/rest/v1/notifications?user_id=eq.${currentProfile.id}&order=created_at.desc&limit=30`,null,currentUser.token);renderNotifications();}catch(e){}
+}
+function toggleNotifPanel(){document.getElementById('notif-panel').classList.toggle('open');}
+function renderNotifications(){
+  const unread=notifications.filter(n=>!n.is_read).length;
+  const badge=document.getElementById('notif-badge');
+  badge.textContent=unread>9?'9+':String(unread);badge.style.display=unread>0?'flex':'none';
+  const list=document.getElementById('notif-list');
+  if(!notifications.length){list.innerHTML='<div class="empty">No notifications yet.</div>';return;}
+  list.innerHTML=notifications.map(n=>`<div class="notif-item ${n.is_read?'':'unread'}" onclick="markRead('${n.id}')"><div class="notif-item-title">${esc(n.title)}</div>${n.message?`<div class="notif-item-msg">${esc(n.message)}</div>`:''}<div class="notif-item-time">${timeAgo(n.created_at)}</div></div>`).join('');
+}
+async function markRead(id){try{await api('PATCH',`${SB}/rest/v1/notifications?id=eq.${id}`,{is_read:true},currentUser.token);notifications=notifications.map(n=>n.id===id?{...n,is_read:true}:n);renderNotifications();}catch(e){}}
+async function markAllRead(){try{await api('PATCH',`${SB}/rest/v1/notifications?user_id=eq.${currentProfile.id}&is_read=eq.false`,{is_read:true},currentUser.token);notifications=notifications.map(n=>({...n,is_read:true}));renderNotifications();}catch(e){}}
+async function sendNotif(uid,type,title,msg,lid){try{await api('POST',`${SB}/rest/v1/notifications`,{user_id:uid,type,title,message:msg,related_lead_id:lid||null},currentUser.token);}catch(e){}}
+function checkPendingReminders(){
+  const ago3=new Date(Date.now()-3*24*60*60*1000).toISOString();
+  leads.filter(l=>(l.status==='Pending'||l.status==='New')&&l.updated_at<ago3).forEach(l=>{
+    const already=notifications.some(n=>n.related_lead_id===l.id&&n.type==='follow_up_reminder'&&new Date(n.created_at)>new Date(Date.now()-3*86400000));
+    if(already)return;
+    if(l.assigned_to)sendNotif(l.assigned_to,'follow_up_reminder',`⏰ Follow up: ${l.company}`,`${l.company} has been ${l.status} for 3+ days. Time to follow up!`,l.id);
+    if(currentProfile.role!=='salesperson')profiles.filter(p=>p.role==='master_admin'||p.role==='admin').forEach(a=>sendNotif(a.id,'follow_up_reminder',`⏰ Reminder: ${l.company}`,`Lead ${l.company} hasn't been closed in 3+ days.`,l.id));
+  });
+  setTimeout(loadNotifications,2000);
+}
+
+function cropToSquare(file, size=400) {
+  return new Promise((res, rej) => {
+    if (!file.type.startsWith('image/')) return rej(new Error('Must be an image.'));
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = size; canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      const min = Math.min(img.width, img.height);
+      const sx = (img.width - min) / 2;
+      const sy = (img.height - min) / 2;
+      ctx.drawImage(img, sx, sy, min, min, 0, 0, size, size);
+      res(canvas.toDataURL('image/jpeg', 0.9));
+    };
+    img.onerror = () => rej(new Error('Image processing failed.'));
+    const reader = new FileReader();
+    reader.onload = e => img.src = e.target.result;
+    reader.onerror = rej;
+    reader.readAsDataURL(file);
+  });
+}
+
+function fileToB64(f){return new Promise((res,rej)=>{if(f.size>2*1024*1024){rej(new Error('File too large. Max 2MB.'));return;}const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(f);});}
+function fszStr(b){if(!b)return'';if(b<1024)return b+'B';if(b<1048576)return(b/1024).toFixed(0)+'KB';return(b/1048576).toFixed(1)+'MB';}
+
+function mkChip(name,size){
+  return`<div class="file-chip">📄 <span>${esc(name)}</span>${size?` <span style="color:var(--hint)">(${size})</span>`:''} <span style="color:var(--teal); font-size:10px; margin-left:4px">(Ready to upload)</span></div>`;
+}
+
+async function handleLeadFile(inp,type){
+  const f=inp.files[0];if(!f)return;
+  try{
+    if(type==='quot'){
+      pQuot={file:f, name:f.name, type:f.type, size:f.size};
+      document.getElementById('l-quot-preview').innerHTML=mkChip(f.name,fszStr(f.size));
+    } else {
+      const d = await cropToSquare(f, 400);
+      const res = await fetch(d);
+      const blob = await res.blob();
+      pProof={file:blob, name:f.name, type:'image/jpeg', size:blob.size};
+      document.getElementById('l-proof-preview').innerHTML=`<img src="${URL.createObjectURL(blob)}" class="proof-preview">`;
+    }
+  }catch(e){toast(e.message,'error');}
+}
+
+async function handleTenderFile(inp){
+  const f=inp.files[0];if(!f)return;
+  pBQ={file:f, name:f.name, type:f.type, size:f.size};
+  document.getElementById('t-bq-preview').innerHTML=mkChip(f.name,fszStr(f.size));
+}
+
+async function handleTenderProofFile(inp){
+  const f=inp.files[0];if(!f)return;
+  try{
+      const d = await cropToSquare(f, 400);
+      const res = await fetch(d);
+      const blob = await res.blob();
+      pSubProof={file:blob, name:f.name, type:'image/jpeg', size:blob.size};
+      document.getElementById('t-proof-preview').innerHTML=`<img src="${URL.createObjectURL(blob)}" class="proof-preview">`;
+  }catch(e){toast(e.message,'error');}
+}
+
+function toggleOtherIndustry(){document.getElementById('other-industry-group').style.display=gv('l-industry')==='Other'?'block':'none';}
+function toggleLostProof(){document.getElementById('lost-proof-section').style.display=gv('l-status')==='Lost'?'block':'none';}
+function toggleOtherTenderIndustry(){document.getElementById('t-other-industry-group').style.display=gv('t-industry')==='Other'?'block':'none';}
+function toggleTenderAwarded(){document.getElementById('t-awarded-group').style.display=gv('t-status')==='Lost'?'block':'none';}
+function toggleTenderProof(){document.getElementById('tender-proof-group').style.display=document.getElementById('t-submitted').checked?'block':'none';}
+
+// NEW: Toggle dynamic service inputs
+function toggleOtherService(){
+  document.getElementById('other-service-group').style.display = gv('l-service') === 'Other' ? 'block' : 'none';
+}
+function toggleTenderOtherService(){
+  document.getElementById('t-other-service-group').style.display = gv('t-service') === 'Other' ? 'block' : 'none';
+}
+
+function openLeadModal(id){
+  const role=currentProfile.role,isAdmin=role!=='salesperson',isSP=role==='salesperson';
+  editLid=id||null;pQuot=null;pProof=null;
+  document.getElementById('l-quot-preview').innerHTML='';document.getElementById('l-proof-preview').innerHTML='';
+  document.getElementById('other-industry-group').style.display='none';document.getElementById('lost-proof-section').style.display='none';
+  document.getElementById('lead-modal-title').textContent=id?(isSP?'Update Lead Details':'Edit Lead'):'Add New Lead';
+  document.getElementById('admin-fields').style.display=isAdmin?'block':'none';
+  document.getElementById('sp-fields').style.display=(isSP||id)?'block':'none';
+  if(isAdmin&&!id)document.getElementById('sp-fields').style.display='none';
+  const spSel=document.getElementById('l-assigned-to');
+  spSel.innerHTML='<option value="">Unassigned</option>'+profiles.filter(p=>p.role==='salesperson').map(p=>`<option value="${p.id}">${esc(p.full_name)}</option>`).join('');
+  if(isSP)sv('l-assigned-to',currentProfile.id);
+  ['company','pic','phone','email','notes'].forEach(f=>sv('l-'+f,''));
+  ['industry'].forEach(f=>sv('l-'+f,''));
+  sv('l-industry-other','');sv('l-status','New');sv('l-visit','');sv('l-pax','');sv('l-price','');sv('l-assigned-to','');
+  
+  // Reset dynamic service fields
+  sv('l-service-other',''); document.getElementById('other-service-group').style.display='none';
+
+  if(id){
+    const l=leads.find(x=>x.id===id);
+    if(l){
+      sv('l-company',l.company);sv('l-pic',l.pic);sv('l-phone',l.phone||'');sv('l-email',l.email||'');
+      const ind=l.industry_other?'Other':(l.industry||'');sv('l-industry',ind);
+      if(l.industry_other){document.getElementById('other-industry-group').style.display='block';sv('l-industry-other',l.industry_other);}
+      
+      // Load standard vs other service logic
+      const stdSrv = ["Commercial Housekeeping", "Office Housekeeping", "Condominium Housekeeping", "Factory Housekeeping", "Facade Cleaning", "Carpet Cleaning", "Marble Polishing", "High-Pressure Water Jet", "Pipeline / Drainage Cleaning", "Labour Supply", "Landscaping", "Septic Tank Cleaning"];
+      if(l.service && !stdSrv.includes(l.service)) {
+        sv('l-service', 'Other'); document.getElementById('other-service-group').style.display='block'; sv('l-service-other', l.service);
+      } else {
+        sv('l-service', l.service||'');
+      }
+
+      sv('l-visit',l.visit||'');sv('l-status',l.status||'New');
+      sv('l-pax',l.no_of_pax||'');sv('l-price',l.price||'');sv('l-notes',l.notes||'');sv('l-assigned-to',l.assigned_to||'');
+      if(l.status==='Lost')document.getElementById('lost-proof-section').style.display='block';
+      const infoBox=document.getElementById('sp-lead-info-box');
+      if(infoBox)infoBox.innerHTML=`📋 <strong>${esc(l.company)}</strong> — ${esc(l.pic)}${l.phone?' · '+esc(l.phone):''}`;
+      if(l.quotation_file&&l.file_name)document.getElementById('l-quot-preview').innerHTML=`<div class="file-chip">📄 <span>${esc(l.file_name)}</span> <span style="color:var(--hint)">(${fszStr(l.quotation_file_size)})</span></div>`;
+      if(l.lost_proof_file)document.getElementById('l-proof-preview').innerHTML=`<img src="${getFileUrl(l.lost_proof_file)}" class="proof-preview">`;
+    }
+  }
+  document.getElementById('lead-modal').classList.add('open');
+}
+function closeLeadModal(){document.getElementById('lead-modal').classList.remove('open');editLid=null;pQuot=null;pProof=null;}
+
+async function saveLead(){
+  const role=currentProfile.role,isAdmin=role!=='salesperson',isSP=role==='salesperson';
+  if(isAdmin&&!editLid){
+    if(!gv('l-company')||!gv('l-pic')||!gv('l-phone')){toast('Fill Company Name, PIC Name and PIC Phone.','error');return;}
+    if(!gv('l-industry')){toast('Please select an industry.','error');return;}
+    if(gv('l-industry')==='Other'&&!gv('l-industry-other')){toast('Please specify the industry.','error');return;}
+  }
+  const btn=document.getElementById('lead-save-btn');btn.innerHTML='<span class="spinner"></span>';btn.disabled=true;
+  const ex=editLid?leads.find(l=>l.id===editLid):null;
+  const assignedTo=gv('l-assigned-to')||null;
+  const salesName=assignedTo?(profiles.find(p=>p.id===assignedTo)||{}).full_name||'':currentProfile.full_name;
+  const d={
+    company:gv('l-company')||(ex?ex.company:''),pic:gv('l-pic')||(ex?ex.pic:''),
+    phone:gv('l-phone')||(ex?ex.phone:''),email:gv('l-email')||(ex?ex.email:''),
+    industry:gv('l-industry')==='Other'?'Other':(gv('l-industry')||(ex?ex.industry:'')),
+    industry_other:gv('l-industry')==='Other'?gv('l-industry-other'):null,
+    
+    // Save standard vs other service logic
+    service:gv('l-service')==='Other'?gv('l-service-other'):(gv('l-service')||(ex?ex.service:'')),
+    
+    visit:gv('l-visit')||null,
+    status:gv('l-status')||'New',notes:gv('l-notes'),
+    assigned_to:assignedTo||(ex?ex.assigned_to:null),sales:salesName,
+    no_of_pax:gv('l-pax')?parseInt(gv('l-pax')):null,
+    price:gv('l-price')?parseFloat(gv('l-price')):null,
+    updated_at:new Date().toISOString()
+  };
+  
+  try{
+    if(pQuot && pQuot.file){
+      d.quotation_file = await uploadToSupabase(pQuot.file, 'quotations');
+      d.file_name = pQuot.name; d.quotation_file_type = pQuot.type; d.quotation_file_size = pQuot.size;
+    } else if(ex) {
+      d.quotation_file=ex.quotation_file; d.file_name=ex.file_name; d.quotation_file_type=ex.quotation_file_type; d.quotation_file_size=ex.quotation_file_size;
+    }
+    
+    if(pProof && pProof.file){
+      d.lost_proof_file = await uploadToSupabase(pProof.file, 'proofs');
+      d.lost_proof_file_name = pProof.name; d.lost_proof_file_type = pProof.type;
+    } else if(ex) {
+      d.lost_proof_file=ex.lost_proof_file; d.lost_proof_file_name=ex.lost_proof_file_name; d.lost_proof_file_type=ex.lost_proof_file_type;
+    }
+
+    if(editLid){
+      await api('PATCH',`${SB}/rest/v1/leads?id=eq.${editLid}`,d,currentUser.token);
+      if(isSP){
+        const admins=profiles.filter(p=>p.role==='master_admin'||p.role==='admin');
+        const sc=ex&&ex.status!==d.status;
+        admins.forEach(a=>sendNotif(a.id,'deal_update',`📝 ${currentProfile.full_name} updated: ${d.company}`,`${sc?'Status → '+d.status:'Details updated'}${d.price?' · RM '+fmtN(d.price):''}`,editLid));
+        if(d.status==='Won'||d.status==='Lost')admins.forEach(a=>sendNotif(a.id,'deal_update',`${d.status==='Won'?'🎉 Deal Won':'❌ Deal Lost'}: ${d.company}`,`${currentProfile.full_name} — ${d.company}${d.price?' · RM '+fmtN(d.price):''}`,editLid));
+      }
+      toast('Lead updated!','success');
+    }else{
+      const nl=await api('POST',`${SB}/rest/v1/leads`,d,currentUser.token);
+      const nid=Array.isArray(nl)?nl[0]?.id:nl?.id;
+      if(d.assigned_to)sendNotif(d.assigned_to,'deal_update',`📋 New lead: ${d.company}`,`You have been assigned ${d.company} (${d.pic} · ${d.phone}). Follow up soon!`,nid||null);
+      toast('Lead added!','success');
+    }
+    closeLeadModal();await loadAll();
+  }catch(e){toast('Save failed: '+e.message,'error');}
+  finally{btn.innerHTML='Save';btn.disabled=false;}
+}
+
+async function requestDeleteLead(id){
+  const l=leads.find(x=>x.id===id);if(!l)return;
+  if(!confirm(`Request deletion of "${l.company}"?`))return;
+  try{
+    await api('PATCH',`${SB}/rest/v1/leads?id=eq.${id}`,{delete_requested:true,delete_requested_at:new Date().toISOString(),delete_requested_by:currentProfile.id},currentUser.token);
+    profiles.filter(p=>p.role==='master_admin').forEach(m=>sendNotif(m.id,'delete_request',`🗑 Delete request: ${l.company}`,`${currentProfile.full_name} wants to delete "${l.company}".`,id));
+    toast('Delete request sent.','success');await loadAll();
+  }catch(e){toast('Failed.','error');}
+}
+async function approveDeleteLead(id){if(!confirm('Permanently delete?'))return;try{await api('DELETE',`${SB}/rest/v1/leads?id=eq.${id}`,null,currentUser.token);toast('Deleted.','success');await loadAll();}catch(e){toast('Failed.','error');}}
+async function rejectDeleteLead(id){try{await api('PATCH',`${SB}/rest/v1/leads?id=eq.${id}`,{delete_requested:false,delete_requested_at:null,delete_requested_by:null},currentUser.token);toast('Rejected.','success');await loadAll();}catch(e){}}
+async function deleteLead(id){if(!confirm('Delete permanently?'))return;try{await api('DELETE',`${SB}/rest/v1/leads?id=eq.${id}`,null,currentUser.token);toast('Deleted.','success');await loadAll();}catch(e){toast('Failed.','error');}}
+
+function openTenderModal(id){
+  const role=currentProfile.role,isAdmin=role!=='salesperson',isSP=role==='salesperson';
+  editTid=id||null;pBQ=null;pSubProof=null;
+  document.getElementById('t-bq-preview').innerHTML='';
+  document.getElementById('t-proof-preview').innerHTML='';
+  document.getElementById('tender-modal-title').textContent=id?'Edit Tender':'Add New Tender';
+  document.getElementById('t-admin-fields').style.display=isAdmin?'block':'none';
+  document.getElementById('t-sp-fields').style.display='block';
+  document.getElementById('t-other-industry-group').style.display='none';
+  document.getElementById('t-awarded-group').style.display='none';
+  const spSel=document.getElementById('t-assigned-to');
+  spSel.innerHTML='<option value="">Unassigned</option>'+profiles.filter(p=>p.role==='salesperson').map(p=>`<option value="${p.id}">${esc(p.full_name)}</option>`).join('');
+  if(isSP)sv('t-assigned-to',currentProfile.id);
+  ['company','project','pic','pic-phone','pic-email','notes'].forEach(f=>sv('t-'+f,''));
+  sv('t-industry','');sv('t-industry-other','');sv('t-status','Ongoing');sv('t-our-price','');sv('t-awarded-price','');sv('t-submit-date','');sv('t-result-date','');sv('t-assigned-to','');
+  document.getElementById('t-submitted').checked = false;
+  toggleTenderProof();
+  
+  // Reset dynamic service fields
+  sv('t-service',''); sv('t-service-other',''); document.getElementById('t-other-service-group').style.display='none';
+  
+  if(id){const t=tenders.find(x=>x.id===id);if(t){
+    sv('t-company',t.company);sv('t-project',t.project_name||'');
+    const tInd=t.industry_other?'Other':(t.industry||'');sv('t-industry',tInd);
+    if(t.industry_other){document.getElementById('t-other-industry-group').style.display='block';sv('t-industry-other',t.industry_other);}
+    
+    // Load standard vs other service logic for tenders
+    const stdSrv = ["Commercial Housekeeping", "Office Housekeeping", "Condominium Housekeeping", "Factory Housekeeping", "Facade Cleaning", "Carpet Cleaning", "Marble Polishing", "High-Pressure Water Jet", "Pipeline / Drainage Cleaning", "Labour Supply", "Landscaping", "Septic Tank Cleaning"];
+    if(t.service && !stdSrv.includes(t.service)) {
+      sv('t-service', 'Other'); document.getElementById('t-other-service-group').style.display='block'; sv('t-service-other', t.service);
+    } else {
+      sv('t-service', t.service||'');
+    }
+
+    sv('t-pic',t.pic_name||'');sv('t-pic-phone',t.pic_phone||'');sv('t-pic-email',t.pic_email||'');
+    sv('t-status',t.status||'Ongoing');sv('t-our-price',t.our_price||'');sv('t-awarded-price',t.awarded_price||'');
+    sv('t-submit-date',t.submission_date||'');sv('t-result-date',t.result_date||'');
+    sv('t-notes',t.notes||'');sv('t-assigned-to',t.assigned_to||'');
+    if(t.status==='Lost')document.getElementById('t-awarded-group').style.display='block';
+    if(t.bq_file&&t.bq_file_name)document.getElementById('t-bq-preview').innerHTML=`<div class="file-chip">📄 <span>${esc(t.bq_file_name)}</span> <span style="color:var(--hint)">(${fszStr(t.bq_file_size)})</span></div>`;
+    if(t.is_submitted){
+       document.getElementById('t-submitted').checked = true;
+       toggleTenderProof();
+       if(t.submit_proof_file) document.getElementById('t-proof-preview').innerHTML=`<img src="${getFileUrl(t.submit_proof_file)}" class="proof-preview">`;
+    }
+  }}
+  document.getElementById('tender-modal').classList.add('open');
+}
+function closeTenderModal(){document.getElementById('tender-modal').classList.remove('open');editTid=null;pBQ=null;pSubProof=null;}
+
+async function saveTender(){
+  const company=gv('t-company');if(!company){toast('Fill Company Name.','error');return;}
+  const btn=document.getElementById('tender-save-btn');btn.innerHTML='<span class="spinner"></span>';btn.disabled=true;
+  const ex=editTid?tenders.find(t=>t.id===editTid):null;
+  const assignedTo=gv('t-assigned-to')||null;
+  const tInd=gv('t-industry')==='Other'?'Other':(gv('t-industry')||'');
+  const tIndOther=gv('t-industry')==='Other'?gv('t-industry-other'):null;
+  const isSub = document.getElementById('t-submitted').checked;
+  const d={
+      company,project_name:gv('t-project'),industry:tInd,industry_other:tIndOther,status:gv('t-status'),
+      
+      // Save standard vs other service logic for Tenders
+      service: gv('t-service') === 'Other' ? gv('t-service-other') : (gv('t-service') || null),
+      
+      our_price:gv('t-our-price')?parseFloat(gv('t-our-price')):null,
+      awarded_price:gv('t-awarded-price')?parseFloat(gv('t-awarded-price')):null,
+      submission_date:gv('t-submit-date')||null,result_date:gv('t-result-date')||null,
+      pic_name:gv('t-pic'),pic_phone:gv('t-pic-phone'),pic_email:gv('t-pic-email'),
+      salesperson:(profiles.find(p=>p.id===assignedTo)||{}).full_name||'',notes:gv('t-notes'),
+      assigned_to:assignedTo,updated_at:new Date().toISOString(),
+      is_submitted: isSub
+  };
+  
+  try{
+    if(pBQ && pBQ.file){
+      d.bq_file = await uploadToSupabase(pBQ.file, 'bq');
+      d.bq_file_name = pBQ.name; d.bq_file_type = pBQ.type; d.bq_file_size = pBQ.size;
+    } else if(ex) {
+       d.bq_file=ex.bq_file; d.bq_file_name=ex.bq_file_name; d.bq_file_type=ex.bq_file_type; d.bq_file_size=ex.bq_file_size;
+    }
+    
+    if(isSub){
+      if(pSubProof && pSubProof.file){
+        d.submit_proof_file = await uploadToSupabase(pSubProof.file, 'proofs');
+      } else if(ex&&ex.submit_proof_file){
+        d.submit_proof_file=ex.submit_proof_file;
+      }
+    } else {
+      d.submit_proof_file=null;
+    }
+
+    if(editTid)await api('PATCH',`${SB}/rest/v1/tenders?id=eq.${editTid}`,d,currentUser.token);
+    else await api('POST',`${SB}/rest/v1/tenders`,d,currentUser.token);
+    toast(editTid?'Tender updated!':'Tender added!','success');closeTenderModal();await loadAll();
+  }catch(e){toast('Save failed: '+e.message,'error');}
+  finally{btn.innerHTML='Save Tender';btn.disabled=false;}
+}
+async function deleteTender(id){if(!confirm('Delete this tender?'))return;try{await api('DELETE',`${SB}/rest/v1/tenders?id=eq.${id}`,null,currentUser.token);toast('Deleted.','success');await loadAll();}catch(e){toast('Failed.','error');}}
+
+function openAddSPModal(){['sp-name','sp-email','sp-phone','sp-password'].forEach(f=>sv(f,''));sv('sp-role','salesperson');document.getElementById('sp-modal').classList.add('open');}
+function closeSPModal(){document.getElementById('sp-modal').classList.remove('open');}
+async function saveSalesperson(){
+  const name=gv('sp-name'),email=gv('sp-email'),pw=gv('sp-password'),role=gv('sp-role'),phone=gv('sp-phone');
+  if(!name||!email||!pw){toast('Fill Name, Email and Password.','error');return;}
+  if(pw.length<6){toast('Password must be at least 6 characters.','error');return;}
+  const btn=document.getElementById('sp-save-btn');btn.innerHTML='<span class="spinner"></span>';btn.disabled=true;
+  try{
+    const r=await fetch(`${SB}/auth/v1/signup`,{method:'POST',headers:{'apikey':ANON_KEY,'Content-Type':'application/json'},body:JSON.stringify({email,password:pw,options:{data:{full_name:name,role}}})});
+    const d=await r.json();
+    const userId=d.user?.id||d.id;
+    if(!r.ok||!userId){
+      const errMsg=d.error?.message||d.msg||d.message||d.error_description||JSON.stringify(d);
+      if(errMsg.includes('already registered')||errMsg.includes('already been registered')){
+        const existing=await fetch(`${SB}/rest/v1/profiles?email=eq.${encodeURIComponent(email)}&select=id`,{headers:getH(currentUser.token)});
+        const existArr=await existing.json();
+        if(existArr.length){
+          await fetch(`${SB}/rest/v1/profiles?id=eq.${existArr[0].id}`,{method:'PATCH',headers:getH(currentUser.token),body:JSON.stringify({full_name:name,phone:phone||null,role,is_active:true})});
+          toast(`Profile updated for ${name}!`,'success');closeSPModal();await loadAll();renderSalespersons();return;
+        }
+        throw new Error('Email already registered.');
+      }
+      throw new Error('Signup error: '+errMsg);
+    }
+    await fetch(`${SB}/rest/v1/profiles`,{method:'POST',headers:{...getH(currentUser.token),'Prefer':'resolution=merge-duplicates'},body:JSON.stringify({id:userId,full_name:name,email,phone:phone||null,role,is_active:true})});
+    toast(`Account created for ${name}!`,'success');closeSPModal();await loadAll();renderSalespersons();
+  }catch(e){toast(e.message,'error');}
+  finally{btn.innerHTML='Create Account';btn.disabled=false;}
+}
+async function deactivateSP(id,name){if(!confirm(`Deactivate ${name}?`))return;try{await api('PATCH',`${SB}/rest/v1/profiles?id=eq.${id}`,{is_active:false},currentUser.token);toast('Deactivated.','success');await loadAll();renderSalespersons();}catch(e){toast('Failed.','error');}}
+async function reactivateSP(id,name){try{await api('PATCH',`${SB}/rest/v1/profiles?id=eq.${id}`,{is_active:true},currentUser.token);toast(`${name} reactivated.`,'success');await loadAll();renderSalespersons();}catch(e){toast('Failed.','error');}}
+
+function renderProfilePage(){
+  const p=currentProfile;
+  const av=document.getElementById('profile-avatar-big');
+  if(p.avatar_data)av.innerHTML=`<img src="${getFileUrl(p.avatar_data)}" alt="">`;else av.textContent=(p.full_name||'U')[0].toUpperCase();
+  document.getElementById('profile-name-display').textContent=p.full_name||'';
+  document.getElementById('profile-email-display').textContent=p.email||'';
+  const rmap={master_admin:['Master Admin','rc-master'],admin:['Admin','rc-admin'],salesperson:['Salesperson','rc-sales']};
+  const[rl,rc]=rmap[p.role]||['User','rc-sales'];
+  document.getElementById('profile-role-chip-display').innerHTML=`<span class="role-chip ${rc}">${rl}</span>`;
+  sv('profile-name',p.full_name||'');sv('profile-phone',p.phone||'');sv('profile-email',p.email||'');
+  
+  const myLeads=leads.filter(l=>l.assigned_to===p.id||l.sales===p.full_name);
+  const myWon=myLeads.filter(l=>l.status==='Won').length;
+  const myActive=myLeads.filter(l=>l.status==='New'||l.status==='Pending').length;
+  const myVal=myLeads.filter(l=>l.status==='Won').reduce((s,l)=>s+(l.price||0),0);
+  const setEl=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  setEl('pkpi-won',myWon);setEl('pkpi-active',myActive);setEl('pkpi-val','RM '+fmtN(myVal));
+  
+  // NOTE: Master Admin forced reset card rendering removed here
+}
+
+async function handleProfilePic(input){
+  const f=input.files[0];if(!f)return;
+  try{
+    if(f.size>2*1024*1024){toast('Max 2MB.','error');return;}
+    const d = await uploadToSupabase(f, 'avatars');
+    await api('PATCH',`${SB}/rest/v1/profiles?id=eq.${currentProfile.id}`,{avatar_data:d},currentUser.token);
+    currentProfile.avatar_data=d;
+    renderProfilePage();renderTopbarProfile();toast('Photo updated!','success');
+  }catch(e){toast('Failed.','error');}
+}
+
+async function saveProfile(){const name=gv('profile-name'),phone=gv('profile-phone');if(!name){toast('Name cannot be empty.','error');return;}try{await api('PATCH',`${SB}/rest/v1/profiles?id=eq.${currentProfile.id}`,{full_name:name,phone,updated_at:new Date().toISOString()},currentUser.token);currentProfile.full_name=name;currentProfile.phone=phone;renderTopbarProfile();renderProfilePage();toast('Saved!','success');}catch(e){toast('Save failed.','error');}}
+async function changePassword(){const np=gv('new-password'),cp=gv('confirm-password');if(!np||np.length<6){toast('Min 6 characters.','error');return;}if(np!==cp){toast('Passwords do not match.','error');return;}try{const r=await fetch(`${SB}/auth/v1/user`,{method:'PUT',headers:{'apikey':ANON_KEY,'Authorization':'Bearer '+currentUser.token,'Content-Type':'application/json'},body:JSON.stringify({password:np})});if(!r.ok)throw new Error();sv('new-password','');sv('confirm-password','');toast('Password updated successfully!','success');}catch(e){toast('Failed to update.','error');}}
+
+// NOTE: resetSPPassword() deleted here
+
+function profileName(id){const p=profiles.find(x=>x.id===id);return p?p.full_name:'Unassigned';}
+
+// Dynamic G-Calendar URL generator
+function getGCalUrl(company, pic, phone, service, dateStr) {
+  const ds = dateStr.replace(/-/g, '');
+  const dates = `${ds}T020000Z/${ds}T030000Z`; 
+  const title = encodeURIComponent(`Site Visit: ${company}`);
+  const details = encodeURIComponent(`PIC: ${pic}\nPhone: ${phone||'—'}\nService: ${service||'—'}\n\nGenerated by TCM CRM`);
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}`;
+}
+
+function showLeadDetail(id){
+  const l=leads.find(x=>x.id===id);if(!l)return;
+  
+  let visitHtml = '—';
+  if(l.visit) {
+     visitHtml = `${fmt(l.visit)} <a href="${getGCalUrl(l.company, l.pic, l.phone, l.service, l.visit)}" target="_blank" style="margin-left:8px;font-size:11px;background:#fff;border:1px solid var(--border-md);padding:3px 8px;border-radius:4px;text-decoration:none;color:var(--text);display:inline-flex;align-items:center;gap:4px;box-shadow:var(--shadow);">📅 Add to G-Calendar</a>`;
+  }
+
+  document.getElementById('detail-title').textContent=l.company;
+  document.getElementById('detail-body').innerHTML=`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:.875rem;padding-bottom:.875rem;border-bottom:1px solid var(--border)">
+      <div class="avatar" style="width:38px;height:38px;font-size:13px">${(l.pic||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}</div>
+      <div><div style="font-weight:700;font-size:14px">${esc(l.pic)}</div><div style="color:var(--muted);font-size:12px">${esc(l.company)}</div></div>
+      <div style="margin-left:auto">${bdg(l.status)}</div>
+    </div>
+    <div>${dr('Industry',l.industry_other||l.industry)}${dr('Phone',l.phone)}${dr('Email',l.email)}${dr('Assigned To',profileName(l.assigned_to))}${dr('Service',l.service)}
+    <div class="detail-row"><span class="detail-label">Site Visit</span><span style="flex:1;font-size:12px;">${visitHtml}</span></div>
+    ${dr('No. of Pax',l.no_of_pax?String(l.no_of_pax):null)}${dr('Price Quoted',l.price?'RM '+fmtN(l.price):null)}</div>
+    ${l.quotation_file&&l.file_name?`<div style="margin-top:.875rem"><div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px">Quotation</div><div style="background:var(--surface);border-radius:var(--radius);padding:8px 10px;border:1px solid var(--border);display:flex;gap:7px;align-items:center;flex-wrap:wrap"><span style="font-size:12px">📄 ${esc(l.file_name)}</span><button class="btn btn-secondary btn-sm" onclick="openStoredFile('${l.quotation_file}')">👁 View</button><button class="btn btn-secondary btn-sm" onclick="saveStoredFile('${l.quotation_file}','${esc(l.file_name)}')">⬇ Download</button></div></div>`:''}
+    ${l.lost_proof_file?`<div style="margin-top:.875rem"><div style="font-size:10px;font-weight:700;color:#e03131;margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px">Lost Proof</div><div style="background:#fff5f5;border-radius:var(--radius);padding:8px 10px;border:1px solid #ffc9c9;"><img src="${getFileUrl(l.lost_proof_file)}" style="width:100%; max-width:200px; height:auto; border-radius:4px; box-shadow:var(--shadow)"></div></div>`:''}
+    ${l.notes?`<div style="margin-top:.875rem"><div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px">Notes</div><div style="background:var(--surface);border-radius:var(--radius);padding:8px 10px;font-size:12px;line-height:1.5">${esc(l.notes)}</div></div>`:''}`;
+  document.getElementById('detail-edit-btn').onclick=()=>{closeDetail();openLeadModal(id);};
+  document.getElementById('detail-modal').classList.add('open');
+}
+
+function showTenderDetail(id){
+  const t=tenders.find(x=>x.id===id);if(!t)return;
+  document.getElementById('detail-title').textContent=t.company+(t.project_name?' — '+t.project_name:'');
+  document.getElementById('detail-body').innerHTML=`
+    <div style="margin-bottom:.875rem">${bdg(t.status)} <span class="badge ${t.is_submitted?'b-won':'b-pending'}" style="margin-left:6px">${t.is_submitted?'Submitted':'Not Submitted'}</span></div>
+    <div>${dr('Project',t.project_name)}${dr('Service',t.service)}${dr('Industry',t.industry_other||t.industry)}${dr('PIC',t.pic_name)}${dr('PIC Phone',t.pic_phone)}${dr('PIC Email',t.pic_email)}${dr('Our Price',t.our_price?'RM '+fmtN(t.our_price):null)}${dr('Awarded Price',t.awarded_price?'RM '+fmtN(t.awarded_price):null)}${dr('Submission',t.submission_date?fmt(t.submission_date):null)}${dr('Result',t.result_date?fmt(t.result_date):null)}${dr('Salesperson',t.salesperson||profileName(t.assigned_to))}</div>
+    ${t.bq_file&&t.bq_file_name?`<div style="margin-top:.875rem"><div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px">BQ Document</div><div style="background:var(--surface);border-radius:var(--radius);padding:8px 10px;border:1px solid var(--border);display:flex;gap:7px;align-items:center;flex-wrap:wrap"><span>📄 ${esc(t.bq_file_name)}</span><button class="btn btn-secondary btn-sm" onclick="openStoredFile('${t.bq_file}')">👁 View</button><button class="btn btn-secondary btn-sm" onclick="saveStoredFile('${t.bq_file}','${esc(t.bq_file_name)}')">⬇ Download</button></div></div>`:''}
+    ${t.submit_proof_file?`<div style="margin-top:.875rem"><div style="font-size:10px;font-weight:700;color:var(--teal-dark);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px">Submission Proof</div><div style="background:var(--teal-bg);border-radius:var(--radius);padding:8px 10px;border:1px solid #b2e4d2;"><img src="${getFileUrl(t.submit_proof_file)}" style="width:100%; max-width:200px; height:auto; border-radius:4px; box-shadow:var(--shadow)"></div></div>`:''}
+    ${t.notes?`<div style="margin-top:.875rem"><div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px">Notes</div><div style="background:var(--surface);border-radius:var(--radius);padding:8px 10px;font-size:12px;line-height:1.5">${esc(t.notes)}</div></div>`:''}`;
+  document.getElementById('detail-edit-btn').onclick=()=>{closeDetail();openTenderModal(id);};
+  document.getElementById('detail-modal').classList.add('open');
+}
+function closeDetail(){document.getElementById('detail-modal').classList.remove('open');}
+
+function dr(label,val){if(!val&&val!==0)return'';return`<div class="detail-row" style="display:flex;padding:6px 0;border-bottom:1px solid var(--border)"><span class="detail-label" style="width:110px;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">${label}</span><span style="flex:1;font-size:12px;word-break:break-word;font-weight:500">${esc(String(val))}</span></div>`;}
+
+function renderDashboard(){
+  const total=leads.length,won=leads.filter(l=>l.status==='Won').length,lost=leads.filter(l=>l.status==='Lost').length,pend=leads.filter(l=>l.status==='Pending').length;
+  const tw=tenders.filter(t=>t.status==='Won').length,to=tenders.filter(t=>t.status==='Ongoing').length;
+  const rate=total?Math.round(won/total*100):0;
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  set('kpi-total',total);set('kpi-won',won);set('kpi-lost',lost);set('kpi-pending',pend);set('kpi-rate',rate+'%');
+  
+  const recent=leads.slice(0,6);
+  const leadsPanel=document.getElementById('dash-leads-panel');
+  if(!recent.length){leadsPanel.innerHTML='<div class="empty">No leads yet. Add your first lead!</div>';}
+  else{leadsPanel.innerHTML=recent.map(l=>`
+    <div class="panel-row">
+      <div class="pr-av">${(l.pic||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}</div>
+      <div style="flex:1;min-width:0">
+        <div class="pr-name">${esc(l.company)}</div>
+        <div class="pr-sub">${esc(l.pic)} · ${esc(profileName(l.assigned_to))}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px">
+        ${bdg(l.status)}
+        <span style="font-size:10px;color:var(--hint)">${l.visit?fmt(l.visit):'No visit'}</span>
+      </div>
+    </div>`).join('');}
+  
+  const sps=profiles.filter(p=>p.role==='salesperson'||p.role==='admin');
+  const teamPanel=document.getElementById('dash-team-panel');
+  if(!sps.length){teamPanel.innerHTML='<div class="empty">No team members yet.</div>';}
+  else{
+    const maxWon=Math.max(1,...sps.map(p=>leads.filter(l=>l.assigned_to===p.id&&l.status==='Won').length));
+    teamPanel.innerHTML=sps.map(p=>{
+      const spLeads=leads.filter(l=>l.assigned_to===p.id);
+      const spWon=spLeads.filter(l=>l.status==='Won').length;
+      const spActive=spLeads.filter(l=>l.status==='New'||l.status==='Pending').length;
+      const pct=Math.round(spWon/maxWon*100);
+      return`<div class="panel-row">
+        <div class="pr-av">${p.avatar_data?`<img src="${getFileUrl(p.avatar_data)}" alt="">`:(p.full_name||'?')[0].toUpperCase()}</div>
+        <div style="flex:1;min-width:0">
+          <div class="pr-name">${esc(p.full_name)}</div>
+          <div class="pr-sub">${spActive} active · ${spWon} won</div>
+        </div>
+        <div class="perf-bar-wrap"><div class="perf-bar" style="width:${pct}%"></div></div>
+        <span style="font-size:12px;font-weight:700;color:var(--teal);min-width:22px;text-align:right">${spWon}</span>
+      </div>`;
+    }).join('');}
+    
+  const activeTenders=tenders.filter(t=>t.status==='Ongoing').slice(0,4);
+  const tendersPanel=document.getElementById('dash-tenders-panel');
+  if(!activeTenders.length){tendersPanel.innerHTML='<div class="empty">No active tenders.</div>';}
+  else{tendersPanel.innerHTML=activeTenders.map(t=>`
+    <div class="panel-row">
+      <div style="flex:1;min-width:0">
+        <div class="pr-name">${esc(t.company)}</div>
+        <div class="pr-sub">${esc(t.project_name||'—')} · ${esc(profileName(t.assigned_to))}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:12px;font-weight:700;color:var(--teal)">${t.our_price?'RM '+fmtN(t.our_price):'—'}</div>
+        <div style="font-size:10px;color:var(--hint)">${t.submission_date?fmt(t.submission_date):'No date'}</div>
+      </div>
+    </div>`).join('');}
+    
+  const stale=leads.filter(l=>(l.status==='Pending'||l.status==='New')&&l.updated_at&&(Date.now()-new Date(l.updated_at).getTime())>3*86400000).slice(0,4);
+  const followPanel=document.getElementById('dash-followup-panel');
+  if(!stale.length){followPanel.innerHTML='<div class="empty" style="padding:1.5rem">All leads are up to date. ✅</div>';}
+  else{followPanel.innerHTML=stale.map(l=>{
+    const days=Math.floor((Date.now()-new Date(l.updated_at).getTime())/86400000);
+    return`<div class="panel-row">
+      <div style="flex:1;min-width:0">
+        <div class="pr-name">${esc(l.company)}</div>
+        <div class="pr-sub">${esc(profileName(l.assigned_to))} · ${bdg(l.status)}</div>
+      </div>
+      <span style="font-size:11px;font-weight:600;color:#e03131;flex-shrink:0">${days}d overdue</span>
+    </div>`;
+  }).join('');}
+}
+
+function renderLeads(){
+  const q=gv('lead-search').toLowerCase(),fs=gv('lead-fstatus'),fsal=gv('lead-fsales');
+  let f=leads.filter(l=>(!q||(l.company||'').toLowerCase().includes(q)||(l.pic||'').toLowerCase().includes(q))&&(!fs||l.status===fs)&&(!fsal||l.assigned_to===fsal));
+  document.getElementById('lead-count').textContent=f.length+' lead'+(f.length!==1?'s':'');
+  const role=currentProfile.role,tbody=document.getElementById('leads-tbody'),empty=document.getElementById('leads-empty');
+  if(!f.length){tbody.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  tbody.innerHTML=f.map(l=>{
+    const ind=l.industry_other||l.industry||'—';
+    const isPD=l.delete_requested&&role==='master_admin';
+    return`<tr style="${isPD?'background:#fffbeb':''}">
+      <td><strong>${esc(l.company)}</strong>${isPD?`<div style="display:flex;gap:4px;margin-top:3px;flex-wrap:wrap"><span style="font-size:10px;color:#f08c00">⚠ Delete requested</span><button class="btn btn-danger btn-sm" onclick="approveDeleteLead('${l.id}')">Approve</button><button class="btn btn-secondary btn-sm" onclick="rejectDeleteLead('${l.id}')">Reject</button></div>`:''}</td>
+      <td style="color:var(--muted)">${esc(ind)}</td>
+      <td>${esc(l.pic)}</td>
+      <td>${l.phone?`<a href="https://wa.me/${l.phone.replace(/\D/g,'')}" target="_blank" style="color:var(--blue);text-decoration:none">📱 ${esc(l.phone)}</a>`:'—'}${l.email?`<div style="font-size:11px;color:var(--muted)">${esc(l.email)}</div>`:''}</td>
+      <td>${esc(profileName(l.assigned_to))}</td>
+      <td style="color:var(--muted)">${l.visit?fmt(l.visit):'—'}</td>
+      <td>${bdg(l.status)}</td>
+      <td style="color:var(--muted)">${l.no_of_pax||'—'}</td>
+      <td style="color:var(--teal);font-weight:600">${l.price?'RM '+fmtN(l.price):'—'}</td>
+      <td>${(()=>{if(!l.quotation_file||!l.file_name)return'<span style="color:var(--hint)">—</span>';return`<div style="display:flex;gap:3px;align-items:center;flex-wrap:wrap"><span style="font-size:11px;color:var(--blue)">📄 ${esc(l.file_name)}</span><button class="btn-icon" onclick="openStoredFile('${l.quotation_file}')" title="View">👁</button><button class="btn-icon" onclick="saveStoredFile('${l.quotation_file}','${esc(l.file_name)}')" title="Download">⬇</button></div>`;})()}</td>
+      <td style="white-space:nowrap">
+        <button class="btn-icon" onclick="showLeadDetail('${l.id}')" title="View Details">👁</button>
+        <button class="btn-icon" onclick="openLeadModal('${l.id}')">✏️</button>
+        ${role==='master_admin'?`<button class="btn-icon red" onclick="deleteLead('${l.id}')">🗑</button>`:`<button class="btn-icon red" onclick="requestDeleteLead('${l.id}')">🗑</button>`}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+let _dealsSP='';
+function selectDealSP(id){
+  _dealsSP=id;
+  document.querySelectorAll('.deals-sp-item').forEach(el=>el.classList.toggle('active',el.dataset.id===id));
+  renderDealsContent();
+}
+
+function renderDeals(){
+  const role=currentProfile.role;
+  if(role==='salesperson') return; 
+
+  document.getElementById('deals-kpi-strip').style.display='grid';
+  if(!document.getElementById('deals-sp-list')){
+    document.querySelector('.deals-layout').innerHTML = `
+      <div><div class="deals-sp-list" id="deals-sp-list"><div class="panel-head" style="background:var(--surface)"><span class="panel-head-title">Salespersons</span></div></div></div>
+      <div id="deals-by-sp"></div>
+    `;
+  }
+
+  const sps = profiles.filter(p=>p.role==='salesperson');
+  const listEl=document.getElementById('deals-sp-list');
+  if(listEl){
+    const allWonTotal=leads.filter(l=>l.status==='Won').length;
+    const allVal=leads.filter(l=>l.status==='Won').reduce((s,l)=>s+(l.price||0),0);
+    listEl.innerHTML=`<div class="panel-head" style="background:var(--surface)"><span class="panel-head-title">Salespersons</span></div>
+      <div class="deals-sp-item all-item ${!_dealsSP?'active':''}" data-id="" onclick="selectDealSP('')">
+        <div class="pr-av" style="background:var(--teal-bg);color:var(--teal);font-size:9px">ALL</div>
+        <div style="flex:1;min-width:0"><div class="pr-name">All Salespersons</div><div class="pr-sub">${allWonTotal} won &nbsp;·&nbsp; RM ${fmtN(allVal)}</div></div>
+      </div>`+sps.map(p=>{
+        const pw=leads.filter(l=>l.assigned_to===p.id&&l.status==='Won').length;
+        const pv=leads.filter(l=>l.assigned_to===p.id&&l.status==='Won').reduce((s,l)=>s+(l.price||0),0);
+        return`<div class="deals-sp-item ${_dealsSP===p.id?'active':''}" data-id="${p.id}" onclick="selectDealSP('${p.id}')">
+          <div class="pr-av">${p.avatar_data?`<img src="${getFileUrl(p.avatar_data)}" alt="">`:(p.full_name||'?')[0].toUpperCase()}</div>
+          <div style="flex:1;min-width:0"><div class="pr-name">${esc(p.full_name)}</div><div class="pr-sub">${pw} won &nbsp;·&nbsp; RM ${fmtN(pv)}</div></div>
+        </div>`;
+      }).join('');
+  }
+  renderDealsContent();
+}
+
+function renderDealsContent(){
+  const role=currentProfile.role;
+  if(role==='salesperson') return; 
+  
+  const selectedSP=_dealsSP;
+  const monthSel=document.getElementById('deals-month-filter');
+  if(monthSel){
+    const cur=monthSel.value;
+    const allClosed=leads.filter(l=>l.status==='Won'||l.status==='Lost'||l.status==='Pending');
+    const months=[...new Set(allClosed.map(l=>{const d=new Date(l.updated_at||l.created_at);return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}))].sort((a,b)=>b.localeCompare(a));
+    monthSel.innerHTML='<option value="">All Months</option>'+months.map(m=>{const[y,mo]=m.split('-');const label=new Date(parseInt(y),parseInt(mo)-1,1).toLocaleString('en-MY',{month:'long',year:'numeric'});return`<option value="${m}"${m===cur?' selected':''}>${label}</option>`;}).join('');
+  }
+  const selectedMonth=monthSel?monthSel.value:'';
+  
+  let filteredLeads=selectedSP?leads.filter(l=>l.assigned_to===selectedSP):leads;
+  
+  if(selectedMonth){
+    filteredLeads=filteredLeads.filter(l=>{
+      if(l.status!=='Won'&&l.status!=='Lost'&&l.status!=='Pending')return false;
+      const d=new Date(l.updated_at||l.created_at);
+      const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+      return key===selectedMonth;
+    });
+  } else {
+    filteredLeads = filteredLeads.filter(l=>l.status==='Won'||l.status==='Lost'||l.status==='Pending');
+  }
+
+  const allWon=filteredLeads.filter(l=>l.status==='Won');
+  const allLost=filteredLeads.filter(l=>l.status==='Lost');
+  const allPend=filteredLeads.filter(l=>l.status==='Pending');
+  const totalWonVal=allWon.reduce((s,l)=>s+(l.price||0),0);
+  
+  const setEl=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  setEl('dkpi-won',allWon.length);
+  setEl('dkpi-lost',allLost.length);
+  setEl('dkpi-pending',allPend.length);
+  setEl('dkpi-val','RM '+fmtN(totalWonVal));
+  const closedCount = allWon.length + allLost.length;
+  setEl('dkpi-rate',(closedCount?Math.round(allWon.length/closedCount*100):0)+'%');
+
+  let sps=profiles.filter(p=>p.role==='salesperson');
+  if(selectedSP) sps=sps.filter(p=>p.id===selectedSP);
+  const container=document.getElementById('deals-by-sp');
+  if(!container) return; 
+  if(!sps.length){container.innerHTML='<div class="empty">No salespersons found.</div>';return;}
+
+  container.innerHTML=sps.map(sp=>{
+    let spLeads=leads.filter(l=>l.assigned_to===sp.id&&(l.status==='Won'||l.status==='Lost'||l.status==='Pending'));
+    
+    if(selectedMonth) {
+      spLeads = spLeads.filter(l=>{
+        const d=new Date(l.updated_at||l.created_at);
+        const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+        return key===selectedMonth;
+      });
+    }
+
+    const totalWon=spLeads.filter(l=>l.status==='Won').length;
+    const totalLost=spLeads.filter(l=>l.status==='Lost').length;
+    const totalPending=spLeads.filter(l=>l.status==='Pending').length;
+    const totalVal=spLeads.filter(l=>l.status==='Won').reduce((s,l)=>s+(l.price||0),0);
+    const av=sp.avatar_data?`<img src="${getFileUrl(sp.avatar_data)}" alt="">`:(sp.full_name||'?')[0].toUpperCase();
+    
+    if(!spLeads.length)return`<div class="sp-deal-block"><div class="sp-deal-head"><div class="sp-deal-av">${av}</div><span style="font-weight:700;font-size:13px">${esc(sp.full_name)}</span><span style="font-size:11px;color:var(--muted);margin-left:6px">— No pipeline deals match this filter</span></div></div>`;
+    
+    const byMonth={};
+    spLeads.forEach(l=>{const d=new Date(l.updated_at||l.created_at);const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;if(!byMonth[key])byMonth[key]=[];byMonth[key].push(l);});
+    const sortedMonths=Object.keys(byMonth).sort((a,b)=>b.localeCompare(a));
+    
+    return`<div class="sp-deal-block">
+      <div class="sp-deal-head">
+        <div class="sp-deal-av">${av}</div>
+        <div><div style="font-weight:700;font-size:13px">${esc(sp.full_name)}</div><div style="font-size:11px;color:var(--muted)">Won value: <strong style="color:var(--teal)">RM ${fmtN(totalVal)}</strong></div></div>
+        <div style="display:flex;gap:5px;margin-left:auto;flex-wrap:wrap">
+          <span class="mpill mpill-won">✅ ${totalWon} Won</span>
+          <span class="mpill mpill-lost">❌ ${totalLost} Lost</span>
+          <span class="mpill mpill-pending">⏳ ${totalPending} Pending</span>
+          <span class="mpill mpill-val">RM ${fmtN(totalVal)}</span>
+        </div>
+      </div>
+      ${sortedMonths.map((monthKey,idx)=>{
+        const mLeads=byMonth[monthKey];
+        const mWon=mLeads.filter(l=>l.status==='Won');
+        const mLost=mLeads.filter(l=>l.status==='Lost');
+        const mPend=mLeads.filter(l=>l.status==='Pending');
+        const mVal=mWon.reduce((s,l)=>s+(l.price||0),0);
+        const[yr,mo]=monthKey.split('-');
+        const monthName=new Date(parseInt(yr),parseInt(mo)-1,1).toLocaleString('en-MY',{month:'long',year:'numeric'});
+        const bodyId=`mb-${sp.id}-${monthKey}`.replace(/[^a-z0-9-]/gi,'_');
+        
+        return`<div class="month-section">
+          <div class="month-header" onclick="toggleMonth('${bodyId}')">
+            <span style="font-size:11px;margin-right:4px" id="arr-${bodyId}">${idx===0?'▼':'▶'}</span>
+            <span class="month-title">${monthName}</span>
+            <div class="month-pills">
+              <span class="mpill mpill-won">✅ ${mWon.length}</span>
+              <span class="mpill mpill-lost">❌ ${mLost.length}</span>
+              <span class="mpill mpill-pending">⏳ ${mPend.length}</span>
+              ${mVal>0?`<span class="mpill mpill-val">RM ${fmtN(mVal)}</span>`:''}
+            </div>
+          </div>
+          <div class="month-body ${selectedMonth?'':'collapsed'}" id="${bodyId}">
+            <div class="overflow"><table>
+              <thead><tr><th>Company</th><th>PIC</th><th>Industry</th><th style="background:#eef2ff;color:#1e3a8a">Service</th><th style="background:#eef2ff;color:#1e3a8a">No. Pax</th><th style="background:#eef2ff;color:#1e3a8a">Price (RM)</th><th>Status</th><th>Visit</th><th>Quotation</th></tr></thead>
+              <tbody>${mLeads.map(l=>{
+                return`<tr>
+                <td style="font-weight:600">${esc(l.company)}</td>
+                <td>${esc(l.pic)}${l.phone?`<div><a href="https://wa.me/${l.phone.replace(/\D/g,'')}" target="_blank" style="font-size:10px;color:var(--blue);text-decoration:none">📱 ${esc(l.phone)}</a></div>`:''}</td>
+                <td style="color:var(--muted)">${esc(l.industry_other||l.industry||'—')}</td>
+                <td style="font-weight:600;color:var(--blue-dark)">${esc(l.service||'—')}</td>
+                <td style="text-align:center;font-weight:700">${l.no_of_pax||'—'}</td>
+                <td style="font-weight:700;color:${l.status==='Won'?'var(--teal)':l.status==='Pending'?'#d97706':'#e03131'}">${l.price?'RM '+fmtN(l.price):'—'}</td>
+                <td>${bdg(l.status)}</td>
+                <td style="color:var(--muted)">${l.visit?fmt(l.visit):'—'}</td>
+                <td>${l.quotation_file&&l.file_name?`<div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">
+                  <button class="btn btn-secondary btn-sm" onclick="openStoredFile('${l.quotation_file}')">👁 View</button>
+                </div>`:'<span style="color:var(--hint)">—</span>'}</td>
+              </tr>`}).join('')}</tbody>
+            </table></div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+}
+
+function toggleMonth(id){
+  const body=document.getElementById(id),arr=document.getElementById('arr-'+id);
+  if(!body)return;
+  const collapsed=body.classList.toggle('collapsed');
+  if(arr)arr.textContent=collapsed?'▶':'▼';
+}
+
+function renderTenders(){
+  const total=tenders.length,tw=tenders.filter(t=>t.status==='Won').length,tl=tenders.filter(t=>t.status==='Lost').length,to=tenders.filter(t=>t.status==='Ongoing').length;
+  document.getElementById('tender-metrics').innerHTML=`<div class="metric-card"><div class="metric-label">Total</div><div class="metric-val">${total}</div></div><div class="metric-card"><div class="metric-label">Ongoing</div><div class="metric-val mv-blue">${to}</div></div><div class="metric-card"><div class="metric-label">Won</div><div class="metric-val mv-teal">${tw}</div></div><div class="metric-card"><div class="metric-label">Lost</div><div class="metric-val mv-red">${tl}</div></div>`;
+  const q=gv('tender-search').toLowerCase(),fs=gv('tender-fstatus');
+  let f=tenders.filter(t=>(!q||(t.company||'').toLowerCase().includes(q)||(t.project_name||'').toLowerCase().includes(q))&&(!fs||t.status===fs));
+  document.getElementById('tender-count').textContent=f.length+' tender'+(f.length!==1?'s':'');
+  const tbody=document.getElementById('tenders-tbody'),empty=document.getElementById('tenders-empty');
+  if(!f.length){tbody.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  tbody.innerHTML=f.map(t=>`<tr>
+    <td><strong>${esc(t.company)}</strong></td>
+    <td style="color:var(--muted)">${esc(t.project_name||'—')}</td>
+    <td>${t.pic_name?`<div>${esc(t.pic_name)}</div>${t.pic_phone?`<a href="https://wa.me/${t.pic_phone.replace(/\D/g,'')}" target="_blank" style="font-size:11px;color:var(--blue);text-decoration:none">📱 ${esc(t.pic_phone)}</a>`:''}`:''}</td>
+    <td style="color:var(--muted)">${esc(profileName(t.assigned_to))}</td>
+    <td style="color:var(--teal);font-weight:600">${t.our_price?'RM '+fmtN(t.our_price):'—'}</td>
+    <td style="color:#e03131;font-weight:600">${t.awarded_price?'RM '+fmtN(t.awarded_price):'—'}</td>
+    <td style="color:var(--muted)">${t.submission_date?fmt(t.submission_date):'—'}</td>
+    <td>${bdg(t.status)}</td>
+    <td style="text-align:center; font-weight:700;">${t.is_submitted?'<span style="color:var(--teal)">✅</span>':'<span style="color:var(--hint)">—</span>'}</td>
+    <td>${(()=>{if(!t.bq_file||!t.bq_file_name)return'<span style="color:var(--hint)">—</span>';return`<div style="display:flex;gap:3px;flex-wrap:wrap;align-items:center"><span style="font-size:11px;color:var(--blue)">📄 ${esc(t.bq_file_name)}</span><button class="btn-icon" onclick="openStoredFile('${t.bq_file}')" title="View">👁</button><button class="btn-icon" onclick="saveStoredFile('${t.bq_file}','${esc(t.bq_file_name)}')" title="Download">⬇</button></div>`;})()}</td>
+    <td style="white-space:nowrap">
+      <button class="btn-icon" onclick="showTenderDetail('${t.id}')" title="View Details">👁</button>
+      <button class="btn-icon" onclick="openTenderModal('${t.id}')">✏️</button>
+      <button class="btn-icon red" onclick="deleteTender('${t.id}')">🗑</button>
+    </td>
+  </tr>`).join('');
+}
+
+function renderRetarget(){
+  const f=gv('retarget-filter'),items=f==='All'?leads:leads.filter(l=>l.status===f);
+  const list=document.getElementById('retarget-list'),empty=document.getElementById('retarget-empty');
+  if(!items.length){list.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  list.innerHTML=items.map(l=>{
+    const init=(l.pic||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    const waNum=l.phone?l.phone.replace(/\D/g,''):'';
+    const waMsg=encodeURIComponent(`Hi ${l.pic}, saya dari Tenaga Cekap Management. Kami ingin follow up berkenaan proposal perkhidmatan pembersihan untuk ${l.company}. Boleh kita bincang lebih lanjut?`);
+    const sp=profiles.find(p=>p.id===l.assigned_to);
+    const spWa=sp&&sp.phone?sp.phone.replace(/\D/g,''):'';
+    const spMsg=sp?encodeURIComponent(`Hi ${sp.full_name}, please follow up on lead: ${l.company} (${l.pic}). Status: ${l.status}.`):'';
+    const daysSince=l.updated_at?Math.floor((Date.now()-new Date(l.updated_at))/86400000):0;
+    return`<div class="retarget-card">
+      <div class="avatar">${init}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;font-size:13px">${esc(l.pic)} <span style="font-weight:400;color:var(--muted)">· ${esc(l.company)}</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${esc(l.service||'General')} · ${bdg(l.status)} · ${daysSince}d since update${sp?' · 👤 '+esc(sp.full_name):''}</div>
+      </div>
+      <div style="display:flex;gap:5px;flex-shrink:0;flex-wrap:wrap">
+        ${waNum?`<a href="https://wa.me/${waNum}?text=${waMsg}" target="_blank" class="wa-btn">💬 Client</a>`:''}
+        ${spWa?`<a href="https://wa.me/${spWa}?text=${spMsg}" target="_blank" class="wa-btn" style="background:#1565c0">📲 Staff</a>`:''}
+        ${l.email?`<a href="mailto:${l.email}" class="mail-btn">✉</a>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderSalespersons(){
+  const all=profiles.filter(p=>p.role==='salesperson'||p.role==='admin');
+  const totalWon=all.reduce((s,p)=>s+leads.filter(l=>l.assigned_to===p.id&&l.status==='Won').length,0);
+  const totalActive=all.reduce((s,p)=>s+leads.filter(l=>l.assigned_to===p.id&&(l.status==='New'||l.status==='Pending')).length,0);
+  const totalVal=all.reduce((s,p)=>s+leads.filter(l=>l.assigned_to===p.id&&l.status==='Won').reduce((sv,l)=>sv+(l.price||0),0),0);
+  const setEl=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  setEl('tkpi-members',all.length);setEl('tkpi-won',totalWon);setEl('tkpi-active',totalActive);setEl('tkpi-val','RM '+fmtN(totalVal));
+  const grid=document.getElementById('sp-grid'),empty=document.getElementById('sp-empty');
+  if(!all.length){grid.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  grid.innerHTML=all.map(p=>{
+    const myL=leads.filter(l=>l.assigned_to===p.id);
+    const won=myL.filter(l=>l.status==='Won').length,lost=myL.filter(l=>l.status==='Lost').length,active=myL.filter(l=>l.status==='Pending'||l.status==='New').length;
+    const wonVal=myL.filter(l=>l.status==='Won').reduce((s,l)=>s+(l.price||0),0);
+    const rmap={admin:['Admin','rc-admin'],salesperson:['Salesperson','rc-sales']};
+    const[rl,rc]=rmap[p.role]||['Salesperson','rc-sales'];
+    const canAct=currentProfile.role==='master_admin'||(currentProfile.role==='admin'&&p.role==='salesperson');
+    return`<div class="sp-card">
+      <div class="sp-av">${p.avatar_data?`<img src="${getFileUrl(p.avatar_data)}" alt="">`:(p.full_name||'?')[0].toUpperCase()}</div>
+      <div style="width:100%;text-align:center">
+        <div style="font-weight:700;font-size:14px">${esc(p.full_name)}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${esc(p.email||'')}</div>
+        ${p.phone?`<div style="font-size:11px;color:var(--muted)">📱 ${esc(p.phone)}</div>`:''}
+        <div style="margin-top:6px"><span class="role-chip ${rc}">${rl}</span>${!p.is_active?' <span style="font-size:10px;color:#e03131;font-weight:700">INACTIVE</span>':''}</div>
+      </div>
+      <div style="display:flex;gap:10px;width:100%">
+        <div style="flex:1;background:var(--surface);border-radius:var(--radius-lg);padding:14px 8px;text-align:center;border:1px solid var(--border)"><div style="font-size:28px;font-weight:700;color:var(--teal)">${won}</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:4px">Won</div></div>
+        <div style="flex:1;background:var(--surface);border-radius:var(--radius-lg);padding:14px 8px;text-align:center;border:1px solid var(--border)"><div style="font-size:28px;font-weight:700;color:#f08c00">${active}</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:4px">Active</div></div>
+        <div style="flex:1;background:var(--surface);border-radius:var(--radius-lg);padding:14px 8px;text-align:center;border:1px solid var(--border)"><div style="font-size:28px;font-weight:700;color:#dc2626">${lost}</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:4px">Lost</div></div>
+      </div>
+      <div style="width:100%;background:linear-gradient(135deg,var(--teal-bg),#e8f5ff);border-radius:var(--radius-lg);padding:12px 14px;border:1px solid #b2e4d2;text-align:center">
+        <div style="font-size:9px;color:var(--teal-dark);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;font-weight:700">Total Won Value</div>
+        <div style="font-size:18px;font-weight:700;color:var(--teal)">RM ${fmtN(wonVal)}</div>
+      </div>
+      <div style="display:flex;gap:6px;width:100%">
+        ${p.phone?`<a href="https://wa.me/${p.phone.replace(/\D/g,'')}" target="_blank" class="wa-btn" style="flex:1;justify-content:center;font-size:11px">💬 WA</a>`:''}
+        ${canAct ? (p.is_active?`<button class="btn btn-danger btn-sm" style="flex:1" onclick="deactivateSP('${p.id}','${esc(p.full_name)}')">Deactivate</button>`:`<button class="btn btn-primary btn-sm" style="flex:1" onclick="reactivateSP('${p.id}','${esc(p.full_name)}')">Reactivate</button>`) : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function populateFilters(){
+  const sel=document.getElementById('lead-fsales'),cur=sel.value;
+  sel.innerHTML='<option value="">All Salesperson</option>'+profiles.filter(p=>p.role==='salesperson').map(p=>`<option value="${p.id}"${p.id===cur?' selected':''}>${esc(p.full_name)}</option>`).join('');
+}
+function gv(id){return(document.getElementById(id)||{}).value||'';}
+function sv(id,v){const e=document.getElementById(id);if(e)e.value=v||'';}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function fmt(d){if(!d)return'—';const[y,m,dd]=d.split('-');return`${dd}/${m}/${y}`;}
+function fmtN(n){return Number(n).toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function bdg(s){const m={Won:'b-won',Lost:'b-lost',Pending:'b-pending',New:'b-new',Ongoing:'b-ongoing'};return`<span class="badge ${m[s]||'b-new'}">${s||'New'}</span>`;}
+function timeAgo(iso){if(!iso)return'';const d=Math.floor((Date.now()-new Date(iso))/1000);if(d<60)return'Just now';if(d<3600)return Math.floor(d/60)+'m ago';if(d<86400)return Math.floor(d/3600)+'h ago';return Math.floor(d/86400)+'d ago';}
+function toast(msg,type){const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(type||'');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);}
+
+['lead-modal','tender-modal','sp-modal','detail-modal'].forEach(id=>{document.getElementById(id).addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('open');});});
+document.addEventListener('click',e=>{const p=document.getElementById('notif-panel'),b=document.getElementById('notif-btn');if(p.classList.contains('open')&&!p.contains(e.target)&&!b.contains(e.target))p.classList.remove('open');});
+
+checkSession();
+</script>
+</body>
+</html>
