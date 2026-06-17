@@ -254,18 +254,16 @@ textarea{resize:vertical;min-height:80px}
   </div>
 </div>
 
-<div id="forgot-modal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:300;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(2px)">
+<div id="recovery-modal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:400;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(2px)">
   <div style="background:#fff;border-radius:var(--radius-xl);box-shadow:var(--shadow-lg);width:100%;max-width:380px;padding:2rem">
     <div style="text-align:center;margin-bottom:1.5rem">
-      <div style="font-size:36px;margin-bottom:8px">🔒</div>
-      <h2 style="font-size:18px;font-weight:700;margin-bottom:4px">Reset Password</h2>
-      <p style="font-size:13px;color:var(--muted)">Enter your email to receive a reset link.</p>
+      <div style="font-size:36px;margin-bottom:8px">🔑</div>
+      <h2 style="font-size:18px;font-weight:700;margin-bottom:4px">Set New Password</h2>
+      <p style="font-size:13px;color:var(--muted)">Enter your new password below.</p>
     </div>
-    <div id="forgot-success" style="display:none;background:var(--teal-bg);border:1px solid #a3e9c8;border-radius:var(--radius);padding:12px;font-size:13px;color:#166534;margin-bottom:1rem;text-align:center">✅ Reset link sent! Check your inbox.</div>
-    <div id="forgot-error" style="display:none;background:#fee2e2;border-radius:var(--radius);padding:10px;font-size:13px;color:#991b1b;margin-bottom:1rem"></div>
-    <div class="fl"><label>Email Address</label><input id="forgot-email" type="email" placeholder="your@email.com" onkeydown="if(event.key==='Enter')sendResetEmail()"></div>
-    <button onclick="sendResetEmail()" id="forgot-btn" style="width:100%;padding:10px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;margin-bottom:12px">Send Reset Link</button>
-    <button onclick="hideForgotPassword()" style="width:100%;padding:8px;background:transparent;color:var(--text);border:1px solid var(--border-md);border-radius:var(--radius);font-size:13px;cursor:pointer">Back to Sign In</button>
+    <div id="recovery-error" style="display:none;background:#fee2e2;border-radius:var(--radius);padding:10px;font-size:13px;color:#991b1b;margin-bottom:1rem"></div>
+    <div class="fl"><label>New Password</label><input id="recovery-new-pw" type="password" placeholder="Min 6 characters"></div>
+    <button onclick="saveRecoveredPassword()" id="recovery-btn" style="width:100%;padding:10px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer">Update Password</button>
   </div>
 </div>
 
@@ -1828,7 +1826,49 @@ function toast(msg,type){const t=document.getElementById('toast');t.textContent=
 ['lead-modal','tender-modal','sp-modal','detail-modal'].forEach(id=>{document.getElementById(id).addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('open');});});
 document.addEventListener('click',e=>{const p=document.getElementById('notif-panel'),b=document.getElementById('notif-btn');if(p.classList.contains('open')&&!p.contains(e.target)&&!b.contains(e.target))p.classList.remove('open');});
 
-checkSession();
+async function saveRecoveredPassword() {
+  const np = document.getElementById('recovery-new-pw').value;
+  if (!np || np.length < 6) { 
+    const err = document.getElementById('recovery-error');
+    err.textContent = 'Password must be at least 6 characters.'; 
+    err.style.display = 'block'; 
+    return; 
+  }
+  
+  const btn = document.getElementById('recovery-btn'); 
+  btn.textContent = 'Updating...'; 
+  btn.disabled = true;
+  document.getElementById('recovery-error').style.display = 'none';
+  
+  try {
+    const r = await fetch(`${SB}/auth/v1/user`, {
+      method: 'PUT',
+      headers: { 'apikey': ANON_KEY, 'Authorization': 'Bearer ' + window.recoveryToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: np })
+    });
+    if (!r.ok) throw new Error('Link expired. Please request a new password reset.');
+    
+    alert('Password updated successfully! Please sign in with your new password.');
+    window.location.href = window.location.pathname; // Reloads the page cleanly
+  } catch (e) {
+    const err = document.getElementById('recovery-error');
+    err.textContent = e.message;
+    err.style.display = 'block';
+    btn.textContent = 'Update Password'; 
+    btn.disabled = false;
+  }
+}
+
+// Detect if user is returning from an email reset link
+const hashParams = new URLSearchParams(window.location.hash.substring(1));
+if (hashParams.get('type') === 'recovery' && hashParams.get('access_token')) {
+  document.getElementById('login-page').style.display = 'none';
+  document.getElementById('recovery-modal').style.display = 'flex';
+  window.recoveryToken = hashParams.get('access_token');
+  window.location.hash = ''; // Clear the URL hash for security
+} else {
+  checkSession();
+}
 </script>
 </body>
 </html>
