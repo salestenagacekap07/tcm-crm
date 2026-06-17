@@ -850,11 +850,15 @@ async function sendResetEmail(){
   document.getElementById('forgot-error').style.display='none';
   document.getElementById('forgot-success').style.display='none';
   
+  // Force the exact GitHub Pages URL destination
+  const redirectUrl = encodeURIComponent('https://salestenagacekap07.github.io/tcm-crm/');
+  
   try{
-    const r=await fetch(`${SB}/auth/v1/recover`,{
+    // Append the redirect_to variable to the end of the fetch URL
+    const r=await fetch(`${SB}/auth/v1/recover?redirect_to=${redirectUrl}`,{
       method:'POST',
       headers:{'apikey':ANON_KEY,'Content-Type':'application/json'},
-      body:JSON.stringify({email})
+      body:JSON.stringify({ email })
     });
     
     if(!r.ok) {
