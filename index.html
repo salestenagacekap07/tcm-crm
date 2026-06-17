@@ -1642,8 +1642,9 @@ function renderDealsContent(){
             </div>
           </div>
           <div class="month-body ${isFiltered||idx===0?'':'collapsed'}" id="${bodyId}">
+            <div class="month-body ${isFiltered||idx===0?'':'collapsed'}" id="${bodyId}">
             <div class="overflow"><table>
-              <thead><tr><th>Type</th><th>Company</th><th>PIC</th><th>Industry</th><th style="background:#eef2ff;color:#1e3a8a">Service / Project</th><th style="background:#eef2ff;color:#1e3a8a">Price (RM)</th><th>Status</th><th>File</th></tr></thead>
+              <thead><tr><th>Type</th><th>Company</th><th>PIC</th><th>Industry</th><th style="background:#eef2ff;color:#1e3a8a">Service / Project</th><th style="background:#eef2ff;color:#1e3a8a">No. Pax</th><th style="background:#eef2ff;color:#1e3a8a">Price (RM)</th><th>Status</th><th>File</th></tr></thead>
               <tbody>${mDeals.map(d=>{
                 const typeBdg = d.isTender ? '<span class="badge b-ongoing" style="font-size:9px">Tender</span>' : '<span class="badge b-new" style="font-size:9px;background:#e2e8f0;color:#475569">Lead</span>';
                 return`<tr>
@@ -1652,6 +1653,7 @@ function renderDealsContent(){
                 <td>${esc(d.pic)}${d.phone?`<div><a href="https://wa.me/${d.phone.replace(/\D/g,'')}" target="_blank" style="font-size:10px;color:var(--blue);text-decoration:none">📱 ${esc(d.phone)}</a></div>`:''}</td>
                 <td style="color:var(--muted)">${esc(d.industry_other||d.industry||'—')}</td>
                 <td style="font-weight:600;color:var(--blue-dark)">${esc(d.service||'—')}</td>
+                <td style="text-align:center;font-weight:700">${d.no_of_pax||'—'}</td>
                 <td style="font-weight:700;color:${d.status==='Won'?'var(--teal)':d.status==='Pending'?'#d97706':'#e03131'}">${d.price?'RM '+fmtN(d.price):'—'}</td>
                 <td>${bdg(d.status)}</td>
                 <td>${d.quotation_file&&d.file_name?`<div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">
