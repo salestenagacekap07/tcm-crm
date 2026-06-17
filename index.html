@@ -250,7 +250,7 @@ textarea{resize:vertical;min-height:80px}
     <div class="fl"><label>Password</label><input id="login-password" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
     <label class="remember-row"><input type="checkbox" id="remember-me"> Remember me</label>
     <button class="login-btn" id="login-btn" onclick="doLogin()">Sign In</button>
-    <div style="text-align:center;margin-top:12px"><a href="#" onclick="showForgotPassword()" style="font-size:12px;color:var(--blue);text-decoration:none">Forgot password?</a></div>
+    <div style="text-align:center;margin-top:12px"><a href="javascript:void(0)" onclick="showForgotPassword()" style="font-size:12px;color:var(--blue);text-decoration:none">Forgot password?</a></div>
   </div>
 </div>
 
@@ -826,14 +826,46 @@ function showForgotPassword(){document.getElementById('forgot-modal').style.disp
 function hideForgotPassword(){document.getElementById('forgot-modal').style.display='none';}
 async function sendResetEmail(){
   const email=gv('forgot-email');
-  if(!email){const e=document.getElementById('forgot-error');e.textContent='Please enter your email.';e.style.display='block';return;}
-  const btn=document.getElementById('forgot-btn');btn.textContent='Sending...';btn.disabled=true;
+  if(!email){
+    const e=document.getElementById('forgot-error');
+    e.textContent='Please enter your email.';
+    e.style.display='block';
+    return;
+  }
+  
+  const btn=document.getElementById('forgot-btn');
+  btn.textContent='Sending...';
+  btn.disabled=true;
   document.getElementById('forgot-error').style.display='none';
+  document.getElementById('forgot-success').style.display='none';
+  
   try{
-    const r=await fetch(`${SB}/auth/v1/recover`,{method:'POST',headers:{'apikey':ANON_KEY,'Content-Type':'application/json'},body:JSON.stringify({email})});
+    const r=await fetch(`${SB}/auth/v1/recover`,{
+      method:'POST',
+      headers:{'apikey':ANON_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify({email})
+    });
+    
+    if(!r.ok) {
+       const txt = await r.text();
+       let msg = 'Failed to send reset link.';
+       try { 
+         const d = JSON.parse(txt); 
+         msg = d.message || d.error_description || d.msg || msg; 
+       } catch(e){}
+       throw new Error(msg);
+    }
+    
     document.getElementById('forgot-success').style.display='block';
-    btn.textContent='Resend Link';btn.disabled=false;
-  }catch(e){const er=document.getElementById('forgot-error');er.textContent=e.message;er.style.display='block';btn.textContent='Send Reset Link';btn.disabled=false;}
+    btn.textContent='Resend Link';
+    btn.disabled=false;
+  }catch(e){
+    const er=document.getElementById('forgot-error');
+    er.textContent=e.message;
+    er.style.display='block';
+    btn.textContent='Send Reset Link';
+    btn.disabled=false;
+  }
 }
 async function checkSession(){
   const s=localStorage.getItem('tcm_sess')||sessionStorage.getItem('tcm_sess');
