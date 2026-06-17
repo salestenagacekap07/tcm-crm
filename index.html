@@ -1497,23 +1497,30 @@ function renderDeals(){
   document.getElementById('deals-kpi-strip').style.display='grid';
   if(!document.getElementById('deals-sp-list')){
     document.querySelector('.deals-layout').innerHTML = `
-      <div><div class="deals-sp-list" id="deals-sp-list"><div class="panel-head" style="background:var(--surface)"><span class="panel-head-title">Salespersons</span></div></div></div>
+      <div><div class="deals-sp-list" id="deals-sp-list"><div class="panel-head" style="background:var(--surface)"><span class="panel-head-title">Team Members</span></div></div></div>
       <div id="deals-by-sp"></div>
     `;
   }
 
-  const sps = profiles.filter(p => p.is_active); // Now includes Admin & Master Admin
+  const sps = profiles.filter(p => p.is_active); 
   const listEl=document.getElementById('deals-sp-list');
+  
+  // Unify Leads and Tenders for KPI tracking
+  const unifiedDeals = [
+    ...leads, 
+    ...tenders.map(t => ({...t, price: t.our_price, status: t.status === 'Ongoing' ? 'Pending' : t.status}))
+  ];
+
   if(listEl){
-    const allWonTotal=leads.filter(l=>l.status==='Won').length;
-    const allVal=leads.filter(l=>l.status==='Won').reduce((s,l)=>s+(l.price||0),0);
-    listEl.innerHTML=`<div class="panel-head" style="background:var(--surface)"><span class="panel-head-title">Salespersons</span></div>
+    const allWonTotal=unifiedDeals.filter(d=>d.status==='Won').length;
+    const allVal=unifiedDeals.filter(d=>d.status==='Won').reduce((s,d)=>s+(d.price||0),0);
+    listEl.innerHTML=`<div class="panel-head" style="background:var(--surface)"><span class="panel-head-title">Team Members</span></div>
       <div class="deals-sp-item all-item ${!_dealsSP?'active':''}" data-id="" onclick="selectDealSP('')">
         <div class="pr-av" style="background:var(--teal-bg);color:var(--teal);font-size:9px">ALL</div>
-        <div style="flex:1;min-width:0"><div class="pr-name">All Salespersons</div><div class="pr-sub">${allWonTotal} won &nbsp;·&nbsp; RM ${fmtN(allVal)}</div></div>
+        <div style="flex:1;min-width:0"><div class="pr-name">All Team Members</div><div class="pr-sub">${allWonTotal} won &nbsp;·&nbsp; RM ${fmtN(allVal)}</div></div>
       </div>`+sps.map(p=>{
-        const pw=leads.filter(l=>l.assigned_to===p.id&&l.status==='Won').length;
-        const pv=leads.filter(l=>l.assigned_to===p.id&&l.status==='Won').reduce((s,l)=>s+(l.price||0),0);
+        const pw=unifiedDeals.filter(d=>d.assigned_to===p.id&&d.status==='Won').length;
+        const pv=unifiedDeals.filter(d=>d.assigned_to===p.id&&d.status==='Won').reduce((s,d)=>s+(d.price||0),0);
         return`<div class="deals-sp-item ${_dealsSP===p.id?'active':''}" data-id="${p.id}" onclick="selectDealSP('${p.id}')">
           <div class="pr-av">${p.avatar_data?`<img src="${getFileUrl(p.avatar_data)}" alt="">`:(p.full_name||'?')[0].toUpperCase()}</div>
           <div style="flex:1;min-width:0"><div class="pr-name">${esc(p.full_name)}</div><div class="pr-sub">${pw} won &nbsp;·&nbsp; RM ${fmtN(pv)}</div></div>
@@ -1533,20 +1540,36 @@ function renderDealsContent(){
   const selectedYear=ySel?ySel.value:'';
   const selectedMonth=mSel?mSel.value:'';
   
-  let filteredLeads=selectedSP?leads.filter(l=>l.assigned_to===selectedSP):leads;
+  // Unify and map Tenders to match Lead structure for the tables
+  const unifiedDeals = [
+    ...leads.map(l => ({ ...l, isTender: false })),
+    ...tenders.map(t => ({
+      ...t,
+      isTender: true,
+      price: t.our_price,
+      phone: t.pic_phone,
+      pic: t.pic_name || '—',
+      service: t.project_name ? (t.service ? t.project_name + ' / ' + t.service : t.project_name) : t.service,
+      status: t.status === 'Ongoing' ? 'Pending' : t.status,
+      quotation_file: t.bq_file,
+      file_name: t.bq_file_name
+    }))
+  ];
   
-  filteredLeads = filteredLeads.filter(l=>{
-    if(l.status!=='Won'&&l.status!=='Lost'&&l.status!=='Pending')return false;
-    const d=new Date(l.updated_at||l.created_at);
-    if(selectedYear && String(d.getFullYear()) !== selectedYear) return false;
-    if(selectedMonth && String(d.getMonth()+1).padStart(2,'0') !== selectedMonth) return false;
+  let filteredDeals=selectedSP?unifiedDeals.filter(d=>d.assigned_to===selectedSP):unifiedDeals;
+  
+  filteredDeals = filteredDeals.filter(d=>{
+    if(d.status!=='Won'&&d.status!=='Lost'&&d.status!=='Pending')return false;
+    const dt=new Date(d.updated_at||d.created_at);
+    if(selectedYear && String(dt.getFullYear()) !== selectedYear) return false;
+    if(selectedMonth && String(dt.getMonth()+1).padStart(2,'0') !== selectedMonth) return false;
     return true;
   });
 
-  const allWon=filteredLeads.filter(l=>l.status==='Won');
-  const allLost=filteredLeads.filter(l=>l.status==='Lost');
-  const allPend=filteredLeads.filter(l=>l.status==='Pending');
-  const totalWonVal=allWon.reduce((s,l)=>s+(l.price||0),0);
+  const allWon=filteredDeals.filter(d=>d.status==='Won');
+  const allLost=filteredDeals.filter(d=>d.status==='Lost');
+  const allPend=filteredDeals.filter(d=>d.status==='Pending');
+  const totalWonVal=allWon.reduce((s,d)=>s+(d.price||0),0);
   
   const setEl=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
   setEl('dkpi-won',allWon.length);
@@ -1556,32 +1579,32 @@ function renderDealsContent(){
   const closedCount = allWon.length + allLost.length;
   setEl('dkpi-rate',(closedCount?Math.round(allWon.length/closedCount*100):0)+'%');
 
-  let sps=profiles.filter(p => p.is_active); // Now includes Admin & Master Admin
+  let sps=profiles.filter(p => p.is_active);
   if(selectedSP) sps=sps.filter(p=>p.id===selectedSP);
   const container=document.getElementById('deals-by-sp');
   if(!container) return; 
-  if(!sps.length){container.innerHTML='<div class="empty">No salespersons found.</div>';return;}
+  if(!sps.length){container.innerHTML='<div class="empty">No team members found.</div>';return;}
 
   container.innerHTML=sps.map(sp=>{
-    let spLeads=leads.filter(l=>l.assigned_to===sp.id&&(l.status==='Won'||l.status==='Lost'||l.status==='Pending'));
+    let spDeals=unifiedDeals.filter(d=>d.assigned_to===sp.id&&(d.status==='Won'||d.status==='Lost'||d.status==='Pending'));
     
-    spLeads = spLeads.filter(l=>{
-      const d=new Date(l.updated_at||l.created_at);
-      if(selectedYear && String(d.getFullYear()) !== selectedYear) return false;
-      if(selectedMonth && String(d.getMonth()+1).padStart(2,'0') !== selectedMonth) return false;
+    spDeals = spDeals.filter(d=>{
+      const dt=new Date(d.updated_at||d.created_at);
+      if(selectedYear && String(dt.getFullYear()) !== selectedYear) return false;
+      if(selectedMonth && String(dt.getMonth()+1).padStart(2,'0') !== selectedMonth) return false;
       return true;
     });
 
-    const totalWon=spLeads.filter(l=>l.status==='Won').length;
-    const totalLost=spLeads.filter(l=>l.status==='Lost').length;
-    const totalPending=spLeads.filter(l=>l.status==='Pending').length;
-    const totalVal=spLeads.filter(l=>l.status==='Won').reduce((s,l)=>s+(l.price||0),0);
+    const totalWon=spDeals.filter(d=>d.status==='Won').length;
+    const totalLost=spDeals.filter(d=>d.status==='Lost').length;
+    const totalPending=spDeals.filter(d=>d.status==='Pending').length;
+    const totalVal=spDeals.filter(d=>d.status==='Won').reduce((s,d)=>s+(d.price||0),0);
     const av=sp.avatar_data?`<img src="${getFileUrl(sp.avatar_data)}" alt="">`:(sp.full_name||'?')[0].toUpperCase();
     
-    if(!spLeads.length)return`<div class="sp-deal-block"><div class="sp-deal-head"><div class="sp-deal-av">${av}</div><span style="font-weight:700;font-size:13px">${esc(sp.full_name)}</span><span style="font-size:11px;color:var(--muted);margin-left:6px">— No pipeline deals match this filter</span></div></div>`;
+    if(!spDeals.length)return`<div class="sp-deal-block"><div class="sp-deal-head"><div class="sp-deal-av">${av}</div><span style="font-weight:700;font-size:13px">${esc(sp.full_name)}</span><span style="font-size:11px;color:var(--muted);margin-left:6px">— No pipeline deals match this filter</span></div></div>`;
     
     const byMonth={};
-    spLeads.forEach(l=>{const d=new Date(l.updated_at||l.created_at);const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;if(!byMonth[key])byMonth[key]=[];byMonth[key].push(l);});
+    spDeals.forEach(d=>{const dt=new Date(d.updated_at||d.created_at);const key=`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}`;if(!byMonth[key])byMonth[key]=[];byMonth[key].push(d);});
     const sortedMonths=Object.keys(byMonth).sort((a,b)=>b.localeCompare(a));
     
     const isFiltered = selectedYear || selectedMonth;
@@ -1598,11 +1621,11 @@ function renderDealsContent(){
         </div>
       </div>
       ${sortedMonths.map((monthKey,idx)=>{
-        const mLeads=byMonth[monthKey];
-        const mWon=mLeads.filter(l=>l.status==='Won');
-        const mLost=mLeads.filter(l=>l.status==='Lost');
-        const mPend=mLeads.filter(l=>l.status==='Pending');
-        const mVal=mWon.reduce((s,l)=>s+(l.price||0),0);
+        const mDeals=byMonth[monthKey];
+        const mWon=mDeals.filter(d=>d.status==='Won');
+        const mLost=mDeals.filter(d=>d.status==='Lost');
+        const mPend=mDeals.filter(d=>d.status==='Pending');
+        const mVal=mWon.reduce((s,d)=>s+(d.price||0),0);
         const[yr,mo]=monthKey.split('-');
         const monthName=new Date(parseInt(yr),parseInt(mo)-1,1).toLocaleString('en-MY',{month:'long',year:'numeric'});
         const bodyId=`mb-${sp.id}-${monthKey}`.replace(/[^a-z0-9-]/gi,'_');
@@ -1620,19 +1643,19 @@ function renderDealsContent(){
           </div>
           <div class="month-body ${isFiltered||idx===0?'':'collapsed'}" id="${bodyId}">
             <div class="overflow"><table>
-              <thead><tr><th>Company</th><th>PIC</th><th>Industry</th><th style="background:#eef2ff;color:#1e3a8a">Service</th><th style="background:#eef2ff;color:#1e3a8a">No. Pax</th><th style="background:#eef2ff;color:#1e3a8a">Price (RM)</th><th>Status</th><th>Visit</th><th>Quotation</th></tr></thead>
-              <tbody>${mLeads.map(l=>{
+              <thead><tr><th>Type</th><th>Company</th><th>PIC</th><th>Industry</th><th style="background:#eef2ff;color:#1e3a8a">Service / Project</th><th style="background:#eef2ff;color:#1e3a8a">Price (RM)</th><th>Status</th><th>File</th></tr></thead>
+              <tbody>${mDeals.map(d=>{
+                const typeBdg = d.isTender ? '<span class="badge b-ongoing" style="font-size:9px">Tender</span>' : '<span class="badge b-new" style="font-size:9px;background:#e2e8f0;color:#475569">Lead</span>';
                 return`<tr>
-                <td style="font-weight:600">${esc(l.company)}</td>
-                <td>${esc(l.pic)}${l.phone?`<div><a href="https://wa.me/${l.phone.replace(/\D/g,'')}" target="_blank" style="font-size:10px;color:var(--blue);text-decoration:none">📱 ${esc(l.phone)}</a></div>`:''}</td>
-                <td style="color:var(--muted)">${esc(l.industry_other||l.industry||'—')}</td>
-                <td style="font-weight:600;color:var(--blue-dark)">${esc(l.service||'—')}</td>
-                <td style="text-align:center;font-weight:700">${l.no_of_pax||'—'}</td>
-                <td style="font-weight:700;color:${l.status==='Won'?'var(--teal)':l.status==='Pending'?'#d97706':'#e03131'}">${l.price?'RM '+fmtN(l.price):'—'}</td>
-                <td>${bdg(l.status)}</td>
-                <td style="color:var(--muted)">${l.visit?fmt(l.visit):'—'}</td>
-                <td>${l.quotation_file&&l.file_name?`<div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">
-                  <button class="btn btn-secondary btn-sm" onclick="openStoredFile('${l.quotation_file}')">👁 View</button>
+                <td>${typeBdg}</td>
+                <td style="font-weight:600">${esc(d.company)}</td>
+                <td>${esc(d.pic)}${d.phone?`<div><a href="https://wa.me/${d.phone.replace(/\D/g,'')}" target="_blank" style="font-size:10px;color:var(--blue);text-decoration:none">📱 ${esc(d.phone)}</a></div>`:''}</td>
+                <td style="color:var(--muted)">${esc(d.industry_other||d.industry||'—')}</td>
+                <td style="font-weight:600;color:var(--blue-dark)">${esc(d.service||'—')}</td>
+                <td style="font-weight:700;color:${d.status==='Won'?'var(--teal)':d.status==='Pending'?'#d97706':'#e03131'}">${d.price?'RM '+fmtN(d.price):'—'}</td>
+                <td>${bdg(d.status)}</td>
+                <td>${d.quotation_file&&d.file_name?`<div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">
+                  <button class="btn btn-secondary btn-sm" onclick="openStoredFile('${d.quotation_file}')">👁 View</button>
                 </div>`:'<span style="color:var(--hint)">—</span>'}</td>
               </tr>`}).join('')}</tbody>
             </table></div>
@@ -1642,7 +1665,6 @@ function renderDealsContent(){
     </div>`;
   }).join('');
 }
-
 function toggleMonth(id){
   const body=document.getElementById(id),arr=document.getElementById('arr-'+id);
   if(!body)return;
