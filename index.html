@@ -696,7 +696,10 @@ let editLid=null,editTid=null,pQuot=null,pProof=null,pBQ=null,pSubProof=null,log
 
 // Supabase Storage API Functions
 async function uploadToSupabase(file, folder) {
-  const ext = file.name.split('.').pop() || 'file';
+  // Safe check: if it's a cropped Blob without a name, default to 'image.jpg'
+  const fileName = file.name || 'image.jpg';
+  const ext = fileName.includes('.') ? fileName.split('.').pop() : 'jpg';
+  
   const path = `${folder}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
   const r = await fetch(`${SB}/storage/v1/object/tcm-files/${path}`, {
     method: 'POST',
