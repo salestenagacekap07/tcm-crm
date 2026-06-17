@@ -1875,17 +1875,18 @@ document.addEventListener('click',e=>{const p=document.getElementById('notif-pan
 
 async function saveRecoveredPassword() {
   const np = document.getElementById('recovery-new-pw').value;
+  const cp = document.getElementById('recovery-confirm-pw').value;
+  
+  const err = document.getElementById('recovery-error');
   if (!np || np.length < 6) { 
-    const err = document.getElementById('recovery-error');
-    err.textContent = 'Password must be at least 6 characters.'; 
-    err.style.display = 'block'; 
-    return; 
+    err.textContent = 'Password must be at least 6 characters.'; err.style.display = 'block'; return; 
+  }
+  if (np !== cp) {
+    err.textContent = 'Passwords do not match.'; err.style.display = 'block'; return;
   }
   
   const btn = document.getElementById('recovery-btn'); 
-  btn.textContent = 'Updating...'; 
-  btn.disabled = true;
-  document.getElementById('recovery-error').style.display = 'none';
+  btn.textContent = 'Updating...'; btn.disabled = true; err.style.display = 'none';
   
   try {
     const r = await fetch(`${SB}/auth/v1/user`, {
@@ -1896,26 +1897,26 @@ async function saveRecoveredPassword() {
     if (!r.ok) throw new Error('Link expired. Please request a new password reset.');
     
     alert('Password updated successfully! Please sign in with your new password.');
-    window.location.href = window.location.pathname; // Reloads the page cleanly
+    window.location.hash = ''; // Clear hash for security
+    window.location.reload();  // Reload page to return to login
   } catch (e) {
-    const err = document.getElementById('recovery-error');
-    err.textContent = e.message;
-    err.style.display = 'block';
-    btn.textContent = 'Update Password'; 
-    btn.disabled = false;
+    err.textContent = e.message; err.style.display = 'block';
+    btn.textContent = 'Update Password'; btn.disabled = false;
   }
 }
 
 // Detect if user is returning from an email reset link
-const hashParams = new URLSearchParams(window.location.hash.substring(1));
-if (hashParams.get('type') === 'recovery' && hashParams.get('access_token')) {
-  document.getElementById('login-page').style.display = 'none';
-  document.getElementById('recovery-modal').style.display = 'flex';
-  window.recoveryToken = hashParams.get('access_token');
-  window.location.hash = ''; // Clear the URL hash for security
-} else {
-  checkSession();
-}
+window.addEventListener('DOMContentLoaded', () => {
+  const hashText = window.location.hash.substring(1);
+  if (hashText.includes('type=recovery') && hashText.includes('access_token=')) {
+    const hashParams = new URLSearchParams(hashText);
+    document.getElementById('login-page').style.display = 'none';
+    document.getElementById('recovery-modal').style.display = 'flex';
+    window.recoveryToken = hashParams.get('access_token');
+  } else {
+    checkSession();
+  }
+});
 </script>
 </body>
 </html>
