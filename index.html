@@ -1061,8 +1061,8 @@ function openLeadModal(id){
   document.getElementById('l-quot-preview').innerHTML='';document.getElementById('l-proof-preview').innerHTML='';
   document.getElementById('other-industry-group').style.display='none';document.getElementById('lost-proof-section').style.display='none';
   document.getElementById('lead-modal-title').textContent=id?(isSP?'Update Lead Details':'Edit Lead'):'Add New Lead';
-  document.getElementById('admin-fields').style.display=isAdmin?'block':'none';
-  document.getElementById('sp-fields').style.display=(isSP||id)?'block':'none';
+  document.getElementById('admin-fields').style.display='block';
+  document.getElementById('sp-fields').style.display='block';
   if(isAdmin&&!id)document.getElementById('sp-fields').style.display='none';
   
   const spSel=document.getElementById('l-assigned-to');
@@ -1107,7 +1107,7 @@ function closeLeadModal(){document.getElementById('lead-modal').classList.remove
 
 async function saveLead(){
   const role=currentProfile.role,isAdmin=role!=='salesperson',isSP=role==='salesperson';
-  if(isAdmin&&!editLid){
+  if(!editLid){
     if(!gv('l-company')||!gv('l-pic')||!gv('l-phone')){toast('Fill Company Name, PIC Name and PIC Phone.','error');return;}
     if(!gv('l-industry')){toast('Please select an industry.','error');return;}
     if(gv('l-industry')==='Other'&&!gv('l-industry-other')){toast('Please specify the industry.','error');return;}
@@ -1187,7 +1187,7 @@ function openTenderModal(id){
   document.getElementById('t-bq-preview').innerHTML='';
   document.getElementById('t-proof-preview').innerHTML='';
   document.getElementById('tender-modal-title').textContent=id?'Edit Tender':'Add New Tender';
-  document.getElementById('t-admin-fields').style.display=isAdmin?'block':'none';
+  document.getElementById('t-admin-fields').style.display='block';
   document.getElementById('t-sp-fields').style.display='block';
   document.getElementById('t-other-industry-group').style.display='none';
   document.getElementById('t-awarded-group').style.display='none';
