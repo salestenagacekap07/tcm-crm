@@ -1020,8 +1020,8 @@ function openLeadModal(id){
   if(isAdmin&&!id)document.getElementById('sp-fields').style.display='none';
   
   const spSel=document.getElementById('l-assigned-to');
-  // Filter for active users only
-  spSel.innerHTML='<option value="">Unassigned</option>'+profiles.filter(p=>p.role==='salesperson' && p.is_active).map(p=>`<option value="${p.id}">${esc(p.full_name)}</option>`).join('');
+  // Replaced: Now includes ALL active users (Master Admin, Admin, Salesperson)
+  spSel.innerHTML='<option value="">Unassigned</option>'+profiles.filter(p => p.is_active).map(p=>`<option value="${p.id}">${esc(p.full_name)} (${p.role.replace('_',' ')})</option>`).join('');
   
   if(isSP)sv('l-assigned-to',currentProfile.id);
   ['company','pic','phone','email','notes'].forEach(f=>sv('l-'+f,''));
@@ -1147,8 +1147,8 @@ function openTenderModal(id){
   document.getElementById('t-awarded-group').style.display='none';
   
   const spSel=document.getElementById('t-assigned-to');
-  // Filter for active users only
-  spSel.innerHTML='<option value="">Unassigned</option>'+profiles.filter(p=>p.role==='salesperson' && p.is_active).map(p=>`<option value="${p.id}">${esc(p.full_name)}</option>`).join('');
+  // Replaced: Now includes ALL active users (Master Admin, Admin, Salesperson)
+  spSel.innerHTML='<option value="">Unassigned</option>'+profiles.filter(p => p.is_active).map(p=>`<option value="${p.id}">${esc(p.full_name)} (${p.role.replace('_',' ')})</option>`).join('');
   
   if(isSP)sv('t-assigned-to',currentProfile.id);
   ['company','project','pic','pic-phone','pic-email','notes'].forEach(f=>sv('t-'+f,''));
@@ -1747,8 +1747,10 @@ function renderSalespersons(){
 
 function populateFilters(){
   const sel=document.getElementById('lead-fsales'),cur=sel.value;
-  sel.innerHTML='<option value="">All Salesperson</option>'+profiles.filter(p=>p.role==='salesperson').map(p=>`<option value="${p.id}"${p.id===cur?' selected':''}>${esc(p.full_name)}</option>`).join('');
+  // Replaced: Changed from just salespersons to all active team members
+  sel.innerHTML='<option value="">All Team Members</option>'+profiles.filter(p => p.is_active).map(p=>`<option value="${p.id}"${p.id===cur?' selected':''}>${esc(p.full_name)}</option>`).join('');
 }
+  
 function gv(id){return(document.getElementById(id)||{}).value||'';}
 function sv(id,v){const e=document.getElementById(id);if(e)e.value=v||'';}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
