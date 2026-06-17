@@ -1296,12 +1296,20 @@ function renderProfilePage(){
   document.getElementById('profile-role-chip-display').innerHTML=`<span class="role-chip ${rc}">${rl}</span>`;
   sv('profile-name',p.full_name||'');sv('profile-phone',p.phone||'');sv('profile-email',p.email||'');
   
-  const myLeads=leads.filter(l=>l.assigned_to===p.id||l.sales===p.full_name);
-  const myWon=myLeads.filter(l=>l.status==='Won').length;
-  const myActive=myLeads.filter(l=>l.status==='New'||l.status==='Pending').length;
-  const myVal=myLeads.filter(l=>l.status==='Won').reduce((s,l)=>s+(l.price||0),0);
-  const setEl=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
-  setEl('pkpi-won',myWon);setEl('pkpi-active',myActive);setEl('pkpi-val','RM '+fmtN(myVal));
+  const statsStrip = document.getElementById('profile-stats-strip');
+  
+  // Hide the Deal KPIs if Master Admin, otherwise show and calculate them
+  if(p.role === 'master_admin') {
+    if(statsStrip) statsStrip.style.display = 'none';
+  } else {
+    if(statsStrip) statsStrip.style.display = 'grid';
+    const myLeads=leads.filter(l=>l.assigned_to===p.id||l.sales===p.full_name);
+    const myWon=myLeads.filter(l=>l.status==='Won').length;
+    const myActive=myLeads.filter(l=>l.status==='New'||l.status==='Pending').length;
+    const myVal=myLeads.filter(l=>l.status==='Won').reduce((s,l)=>s+(l.price||0),0);
+    const setEl=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+    setEl('pkpi-won',myWon);setEl('pkpi-active',myActive);setEl('pkpi-val','RM '+fmtN(myVal));
+  }
 }
 
 async function handleProfilePic(input){
@@ -1494,7 +1502,7 @@ function renderDeals(){
     `;
   }
 
-  const sps = profiles.filter(p=>p.role==='salesperson');
+  const sps = profiles.filter(p => p.is_active); // Now includes Admin & Master Admin
   const listEl=document.getElementById('deals-sp-list');
   if(listEl){
     const allWonTotal=leads.filter(l=>l.status==='Won').length;
@@ -1548,7 +1556,7 @@ function renderDealsContent(){
   const closedCount = allWon.length + allLost.length;
   setEl('dkpi-rate',(closedCount?Math.round(allWon.length/closedCount*100):0)+'%');
 
-  let sps=profiles.filter(p=>p.role==='salesperson');
+  let sps=profiles.filter(p => p.is_active); // Now includes Admin & Master Admin
   if(selectedSP) sps=sps.filter(p=>p.id===selectedSP);
   const container=document.getElementById('deals-by-sp');
   if(!container) return; 
