@@ -1380,13 +1380,31 @@ function closeDetail(){document.getElementById('detail-modal').classList.remove(
 function dr(label,val){if(!val&&val!==0)return'';return`<div class="detail-row" style="display:flex;padding:6px 0;border-bottom:1px solid var(--border)"><span class="detail-label" style="width:110px;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">${label}</span><span style="flex:1;font-size:12px;word-break:break-word;font-weight:500">${esc(String(val))}</span></div>`;}
 
 function renderDashboard(){
-  const total=leads.length,won=leads.filter(l=>l.status==='Won').length,lost=leads.filter(l=>l.status==='Lost').length,pend=leads.filter(l=>l.status==='Pending').length;
-  const tw=tenders.filter(t=>t.status==='Won').length,to=tenders.filter(t=>t.status==='Ongoing').length;
-  const rate=total?Math.round(won/total*100):0;
+  // 1. Unify Leads and Tenders to match the Deals section
+  const unifiedDeals = [
+    ...leads, 
+    ...tenders.map(t => ({...t, status: t.status === 'Ongoing' ? 'Pending' : t.status}))
+  ];
+
+  // 2. Calculate totals from the unified pipeline
+  const total = unifiedDeals.length;
+  const won = unifiedDeals.filter(d => d.status === 'Won').length;
+  const lost = unifiedDeals.filter(d => d.status === 'Lost').length;
+  const pend = unifiedDeals.filter(d => d.status === 'Pending').length;
+  
+  // 3. Match the Deals Close Rate formula: Won / (Won + Lost)
+  const closedCount = won + lost;
+  const rate = closedCount ? Math.round((won / closedCount) * 100) : 0;
+
   const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
-  set('kpi-total',total);set('kpi-won',won);set('kpi-lost',lost);set('kpi-pending',pend);set('kpi-rate',rate+'%');
+  set('kpi-total',total);
+  set('kpi-won',won);
+  set('kpi-lost',lost);
+  set('kpi-pending',pend);
+  set('kpi-rate',rate+'%');
   
   const recent=leads.slice(0,6);
+  // ... (keep the rest of your renderDashboard function exactly the same below this line) ...
   const leadsPanel=document.getElementById('dash-leads-panel');
   if(!recent.length){leadsPanel.innerHTML='<div class="empty">No leads yet. Add your first lead!</div>';}
   else{leadsPanel.innerHTML=recent.map(l=>`
