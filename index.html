@@ -1819,6 +1819,7 @@ function renderSalespersons(){
   const grid=document.getElementById('sp-grid'),empty=document.getElementById('sp-empty');
   if(!all.length){grid.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
+  
   grid.innerHTML=all.map(p=>{
     const myL=leads.filter(l=>l.assigned_to===p.id);
     const won=myL.filter(l=>l.status==='Won').length,lost=myL.filter(l=>l.status==='Lost').length,active=myL.filter(l=>l.status==='Pending'||l.status==='New').length;
@@ -1826,9 +1827,9 @@ function renderSalespersons(){
     const rmap={admin:['Admin','rc-admin'],salesperson:['Salesperson','rc-sales']};
     const[rl,rc]=rmap[p.role]||['Salesperson','rc-sales'];
     
-    // Permission checks
-    const canAct=currentProfile.role==='master_admin'||(currentProfile.role==='admin'&&p.role==='salesperson');
-    const isMasterAdmin=currentProfile.role==='master_admin';
+    // UPDATED PERMISSION: Only Master Admin can perform deactivate/reactivate
+    const canAct = currentProfile.role === 'master_admin';
+    const isMasterAdmin = currentProfile.role === 'master_admin';
     
     return`<div class="sp-card">
       ${isMasterAdmin ? `<button class="btn-icon red" style="position:absolute;top:10px;right:10px;font-size:12px;padding:4px;" title="Remove User completely" onclick="softDeleteSP('${p.id}','${esc(p.full_name)}')">✕</button>` : ''}
