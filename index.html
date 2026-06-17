@@ -1235,8 +1235,18 @@ async function saveTender(){
   }catch(e){toast('Save failed: '+e.message,'error');}
   finally{btn.innerHTML='Save Tender';btn.disabled=false;}
 }
+async function requestDeleteTender(id){
+  const t=tenders.find(x=>x.id===id);if(!t)return;
+  if(!confirm(`Request deletion of "${t.company}"?`))return;
+  try{
+    await api('PATCH',`${SB}/rest/v1/tenders?id=eq.${id}`,{delete_requested:true,delete_requested_at:new Date().toISOString(),delete_requested_by:currentProfile.id},currentUser.token);
+    profiles.filter(p=>p.role==='master_admin').forEach(m=>sendNotif(m.id,'delete_request',`🗑 Delete request: ${t.company}`,`${currentProfile.full_name} wants to delete "${t.company}".`,id));
+    toast('Delete request sent.','success');await loadAll();
+  }catch(e){toast('Failed.','error');}
+}
+async function approveDeleteTender(id){if(!confirm('Permanently delete?'))return;try{await api('DELETE',`${SB}/rest/v1/tenders?id=eq.${id}`,null,currentUser.token);toast('Deleted.','success');await loadAll();}catch(e){toast('Failed.','error');}}
+async function rejectDeleteTender(id){try{await api('PATCH',`${SB}/rest/v1/tenders?id=eq.${id}`,{delete_requested:false,delete_requested_at:null,delete_requested_by:null},currentUser.token);toast('Rejected.','success');await loadAll();}catch(e){}}
 async function deleteTender(id){if(!confirm('Delete this tender?'))return;try{await api('DELETE',`${SB}/rest/v1/tenders?id=eq.${id}`,null,currentUser.token);toast('Deleted.','success');await loadAll();}catch(e){toast('Failed.','error');}}
-
 function openAddSPModal(){['sp-name','sp-email','sp-phone','sp-password'].forEach(f=>sv(f,''));sv('sp-role','salesperson');document.getElementById('sp-modal').classList.add('open');}
 function closeSPModal(){document.getElementById('sp-modal').classList.remove('open');}
 
@@ -1701,8 +1711,13 @@ function renderTenders(){
   const tbody=document.getElementById('tenders-tbody'),empty=document.getElementById('tenders-empty');
   if(!f.length){tbody.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
-  tbody.innerHTML=f.map(t=>`<tr>
-    <td><strong>${esc(t.company)}</strong></td>
+  
+  const role=currentProfile.role;
+
+  tbody.innerHTML=f.map(t=>{
+    const isPD=t.delete_requested&&role==='master_admin';
+    return `<tr>
+    <td><strong>${esc(t.company)}</strong>${isPD?`<div style="display:flex;gap:4px;margin-top:3px;flex-wrap:wrap"><span style="font-size:10px;color:#f08c00">⚠ Delete requested</span><button class="btn btn-danger btn-sm" onclick="approveDeleteTender('${t.id}')">Approve</button><button class="btn btn-secondary btn-sm" onclick="rejectDeleteTender('${t.id}')">Reject</button></div>`:''}</td>
     <td style="color:var(--muted)">${esc(t.project_name||'—')}</td>
     <td>${t.pic_name?`<div>${esc(t.pic_name)}</div>${t.pic_phone?`<a href="https://wa.me/${t.pic_phone.replace(/\D/g,'')}" target="_blank" style="font-size:11px;color:var(--blue);text-decoration:none">📱 ${esc(t.pic_phone)}</a>`:''}`:''}</td>
     <td style="color:var(--muted)">${esc(profileName(t.assigned_to))}</td>
@@ -1715,9 +1730,9 @@ function renderTenders(){
     <td style="white-space:nowrap">
       <button class="btn-icon" onclick="showTenderDetail('${t.id}')" title="View Details">👁</button>
       <button class="btn-icon" onclick="openTenderModal('${t.id}')">✏️</button>
-      <button class="btn-icon red" onclick="deleteTender('${t.id}')">🗑</button>
+      ${role==='master_admin'?`<button class="btn-icon red" onclick="deleteTender('${t.id}')">🗑</button>`:`<button class="btn-icon red" onclick="requestDeleteTender('${t.id}')">🗑</button>`}
     </td>
-  </tr>`).join('');
+  </tr>`}).join('');
 }
 
 function renderRetarget(){
