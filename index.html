@@ -3,22 +3,44 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TCM CRM — Tenaga Cekap Management</title>
+<title>TCM GROUP CRM — Tenaga Cekap Management Group</title>
 <link rel="icon" href="https://tenagacekap.com.my/wp-content/uploads/2019/05/tenaga-log-icon.png">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --blue: #2563eb; --blue-dark: #1d4ed8; --blue-light: #eff6ff; --blue-mid: #3b82f6;
-  --teal: #0d9488; --teal-dark: #0f766e; --teal-bg: #f0fdfa;
-  --text: #0f172a; --muted: #64748b; --hint: #94a3b8;
-  --bg: #ffffff; --surface: #f8fafc; --surface2: #e2e8f0; --hover: #f1f5f9;
-  --sidebar-bg: #1e293b; --sidebar-hover: #334155; --sidebar-text: #94a3b8;
-  --border: #e2e8f0; --border-md: #cbd5e1;
-  --radius: 8px; --radius-lg: 12px; --radius-xl: 16px;
-  --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
-  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
-  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  /* Pipedrive Inspired Green Schema */
+  --blue: #22c55e; /* Primary Green */
+  --blue-dark: #166534; 
+  --blue-light: #f0fdf4; 
+  --blue-mid: #16a34a; 
+  
+  --teal: #059669; 
+  --teal-dark: #064e3b; 
+  --teal-bg: #ecfdf5;
+  
+  --text: #111827; 
+  --muted: #6b7280; 
+  --hint: #9ca3af;
+  
+  --bg: #ffffff; 
+  --surface: #f9fafb; 
+  --surface2: #e5e7eb; 
+  --hover: #f3f4f6;
+  
+  --sidebar-bg: #0f172a; 
+  --sidebar-hover: #1e293b; 
+  --sidebar-text: #94a3b8;
+  
+  --border: #e5e7eb; 
+  --border-md: #d1d5db;
+  
+  /* Retaining your structure */
+  --radius: 6px; 
+  --radius-lg: 8px; 
+  --radius-xl: 12px;
+  --shadow: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-lg: 0 4px 12px rgba(0,0,0,0.08);
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 body{font-family:var(--font);background:var(--surface);color:var(--text);font-size:13px;line-height:1.4}
 
@@ -75,7 +97,7 @@ body{font-family:var(--font);background:var(--surface);color:var(--text);font-si
 .btn-icon:hover{background:var(--surface2);color:var(--text)}
 .btn-icon.red:hover{background:#fef2f2;color:#dc2626}
 
-.main{padding:1.5rem 2rem;overflow-y:auto;flex:1;max-width:1600px;width:100%;margin:0 auto}
+.main{padding: 2.5rem 3rem; overflow-y:auto; flex:1; max-width:1600px; width:100%; margin:0 auto}
 .view{display:none;animation:fadeIn 0.3s ease}.view.active{display:block}
 @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 .card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow)}
@@ -100,9 +122,13 @@ td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:middle
 tr:last-child td{border-bottom:none}
 tr:hover td{background:var(--surface)}
 
-.badge{display:inline-flex;align-items:center;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
-.b-won{background:#dcfce7;color:#166534}.b-lost{background:#fee2e2;color:#991b1b}.b-pending{background:#fef3c7;color:#92400e}.b-new{background:#eff6ff;color:#1e40af}.b-ongoing{background:#ede9fe;color:#5b21b6}
-
+.badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:600;white-space:nowrap;text-transform:uppercase}
+.b-won{background:#d1fae5;color:#065f46} /* Green Won */
+.b-lost{background:#fee2e2;color:#991b1b} /* Red Lost */
+.b-pending{background:#fef3c7;color:#92400e} /* Amber Pending */
+.b-new{background:#e0f2fe;color:#075985} /* Blue New */
+.b-ongoing{background:#ede9fe;color:#5b21b6} /* Purple Ongoing */
+  
 .empty{text-align:center;padding:3rem 1rem;color:var(--muted);font-size:13px;background:#fff;border-radius:var(--radius-lg)}
 
 .sp-deal-block{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:1.5rem;overflow:hidden;box-shadow:var(--shadow)}
