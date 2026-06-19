@@ -81,14 +81,14 @@ body{font-family:var(--font);background:var(--surface);color:var(--text);font-si
   padding: 1.5rem 1.25rem;
   display: flex;
   align-items: center;
-  gap: 5px; /* Increased gap */
+  gap: 15px; /* Increased gap */
   background: #065f46;
   border-bottom: 1px solid #059669;
 }
 
 .sidebar .logo img {
-  width: 40px; 
-  height: 40px; 
+  width: 50px; 
+  height: 50px; 
   object-fit: contain; 
   border-radius: 4px;
 }
@@ -97,7 +97,7 @@ body{font-family:var(--font);background:var(--surface);color:var(--text);font-si
   font-size: 14px;
   font-weight: 500;
   color: #d1fae5;
-  line-height: 1.2;
+  line-height: 0.9;
 }
 
 .sidebar .logo b {
@@ -105,6 +105,7 @@ body{font-family:var(--font);background:var(--surface);color:var(--text);font-si
   font-size: 16px;
   font-weight: 700;
   color: #fff;
+  margin-bottom: 2px; /* Pulls CRM closer to TCM GROUP */
 }
 
 /* Make sure the text in the sidebar matches the new green theme */
@@ -369,12 +370,12 @@ textarea{resize:vertical;min-height:80px}
     <button type="button" onclick="saveRecoveredPassword()" id="recovery-btn" style="width:100%;padding:10px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer">Update Password</button>
   </div>
 </div>
-
+/* title change here */
 <div id="app" class="app">
-  <aside class="sidebar">
+<aside class="sidebar">
   <div class="logo">
     <img src="https://tenagacekap.com.my/wp-content/uploads/2019/05/tenaga-log-icon.png" alt="TCM">
-    <span><b>TCM GROUP</b><br>CRM</span>
+    <span><b>TCM GROUP</b> CRM</span>
   </div>
   <nav class="nav-tabs" id="nav-tabs"></nav>
 </aside>
