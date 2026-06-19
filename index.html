@@ -27,9 +27,9 @@
   --surface2: #e5e7eb; 
   --hover: #f3f4f6;
   
-  --sidebar-bg: #0f172a; 
-  --sidebar-hover: #1e293b; 
-  --sidebar-text: #94a3b8;
+  --sidebar-bg: #064e3b; /* Deep Forest Green for Sidebar */
+  --sidebar-hover: #047857; /* Slightly lighter green on hover */
+  --sidebar-text: #d1fae5; /* Soft light green for text */
   
   --border: #e5e7eb; 
   --border-md: #d1d5db;
@@ -64,14 +64,53 @@ body{font-family:var(--font);background:var(--surface);color:var(--text);font-si
 .login-error{background:#fee2e2;color:#dc2626;border-radius:var(--radius);padding:9px 11px;font-size:12px;margin-bottom:.875rem;display:none}
 
 .app{display:none;height:100vh;overflow:hidden;flex-direction:row;width:100%}
-.sidebar{width:250px;background:var(--sidebar-bg);display:flex;flex-direction:column;flex-shrink:0;z-index:100;transition:all 0.3s}
-.sidebar .logo{padding:1.5rem 1.25rem;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,0.05)}
-.sidebar .logo img{width:28px;height:28px;object-fit:contain}
-.sidebar .logo span{font-size:15px;font-weight:700;color:#fff}.sidebar .logo b{color:var(--blue-mid)}
-.nav-tabs{display:flex;flex-direction:column;padding:1rem 0;flex:1;overflow-y:auto;gap:4px}
-.nav-tab{padding:12px 1.5rem;display:flex;align-items:center;gap:10px;cursor:pointer;color:var(--sidebar-text);font-size:13px;font-weight:500;border-left:3px solid transparent;transition:all 0.2s}
-.nav-tab:hover{background:var(--sidebar-hover);color:#fff}
-.nav-tab.active{background:rgba(37,99,235,0.15);color:#fff;border-left-color:var(--blue-mid);font-weight:600}
+/* Sidebar refinement for the "Forest Green" look */
+.sidebar {
+  width: 250px;
+  background: var(--sidebar-bg); /* Deep Forest Green */
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  z-index: 100;
+  transition: all 0.3s;
+  border-right: 1px solid #059669; /* Subtle green border */
+}
+
+/* Sidebar Logo adjustment */
+.sidebar .logo {
+  padding: 1.5rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #065f46; /* Slightly darker shade for logo area */
+  border-bottom: 1px solid #059669;
+}
+
+/* Make sure the text in the sidebar matches the new green theme */
+.nav-tab {
+  padding: 12px 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  color: var(--sidebar-text);
+  font-size: 13px;
+  font-weight: 500;
+  border-left: 3px solid transparent;
+  transition: all 0.2s;
+}
+
+.nav-tab:hover {
+  background: var(--sidebar-hover);
+  color: #fff;
+}
+
+.nav-tab.active {
+  background: #065f46;
+  color: #fff;
+  border-left-color: #34d399; /* Bright green accent for active tab */
+  font-weight: 600;
+}
 
 .content-wrapper{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--surface)}
 .top-header{height:60px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;flex-shrink:0;z-index:50}
