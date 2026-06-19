@@ -64,25 +64,46 @@ body{font-family:var(--font);background:var(--surface);color:var(--text);font-si
 .login-error{background:#fee2e2;color:#dc2626;border-radius:var(--radius);padding:9px 11px;font-size:12px;margin-bottom:.875rem;display:none}
 
 .app{display:none;height:100vh;overflow:hidden;flex-direction:row;width:100%}
-/* Sidebar refinement for the "Forest Green" look */
-.sidebar .logo img{width:40px; height:40px; object-fit:contain; border-radius: 4px;}
+/* Sidebar refinement */
+.sidebar {
+  width: 250px;
   background: var(--sidebar-bg); /* Deep Forest Green */
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
   z-index: 100;
   transition: all 0.3s;
-  border-right: 1px solid #059669; /* Subtle green border */
+  border-right: 1px solid #059669;
 }
 
-/* Sidebar Logo adjustment */
 .sidebar .logo {
   padding: 1.5rem 1.25rem;
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: #065f46; /* Slightly darker shade for logo area */
+  gap: 12px; /* Increased gap */
+  background: #065f46;
   border-bottom: 1px solid #059669;
+}
+
+.sidebar .logo img {
+  width: 40px; 
+  height: 40px; 
+  object-fit: contain; 
+  border-radius: 4px;
+}
+
+.sidebar .logo span {
+  font-size: 14px;
+  font-weight: 500;
+  color: #d1fae5;
+  line-height: 1.2;
+}
+
+.sidebar .logo b {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
 }
 
 /* Make sure the text in the sidebar matches the new green theme */
@@ -350,12 +371,12 @@ textarea{resize:vertical;min-height:80px}
 
 <div id="app" class="app">
   <aside class="sidebar">
-    <div class="logo">
-      <img src="https://tenagacekap.com.my/wp-content/uploads/2019/05/tenaga-log-icon.png" alt="TCM">
-      <span><b>TCM GROUP</b> CRM</span>
-    </div>
-    <nav class="nav-tabs" id="nav-tabs"></nav>
-  </aside>
+  <div class="logo">
+    <img src="https://tenagacekap.com.my/wp-content/uploads/2019/05/tenaga-log-icon.png" alt="TCM">
+    <span><b>TCM GROUP</b><br>CRM</span>
+  </div>
+  <nav class="nav-tabs" id="nav-tabs"></nav>
+</aside>
 
   <div class="content-wrapper">
     <header class="top-header">
