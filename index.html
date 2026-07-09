@@ -1661,7 +1661,7 @@ function renderDeals(){
     `;
   }
 
-  const sps = profiles.filter(p => p.is_active); 
+  const sps = profiles.filter(p => (p.role==='salesperson' || p.role==='admin') && p.is_active);
   const listEl=document.getElementById('deals-sp-list');
   
   // Unify Leads and Tenders for KPI tracking
@@ -1738,7 +1738,7 @@ function renderDealsContent(){
   const closedCount = allWon.length + allLost.length;
   setEl('dkpi-rate',(closedCount?Math.round(allWon.length/closedCount*100):0)+'%');
 
-  let sps=profiles.filter(p => p.is_active);
+  let sps=profiles.filter(p => (p.role==='salesperson' || p.role==='admin') && p.is_active);
   if(selectedSP) sps=sps.filter(p=>p.id===selectedSP);
   const container=document.getElementById('deals-by-sp');
   if(!container) return; 
