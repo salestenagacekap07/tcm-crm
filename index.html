@@ -447,7 +447,7 @@ textarea{resize:vertical;min-height:80px}
             <div class="filters">
               <div class="sw">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <input class="si" id="lead-search" type="text" placeholder="Search company or PIC..." oninput="renderLeads()">
+                <input class="si" id="lead-search" type="text" placeholder="Search company or PIC..." oninput="dRenderLeads()">
               </div>
               <select class="fs" id="lead-fstatus" onchange="renderLeads()"><option value="">All Status</option><option>New</option><option>Pending</option><option>Won</option><option>Lost</option></select>
               <select class="fs" id="lead-fsales" onchange="renderLeads()"><option value="">All Team Members</option></select>
@@ -515,7 +515,7 @@ textarea{resize:vertical;min-height:80px}
             <div class="filters">
               <div class="sw">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <input class="si" id="tender-search" type="text" placeholder="Search company..." oninput="renderTenders()">
+                <input class="si" id="tender-search" type="text" placeholder="Search company..." oninput="dRenderTenders()">
               </div>
               <select class="fs" id="tender-fstatus" onchange="renderTenders()"><option value="">All Status</option><option>Ongoing</option><option>Won</option><option>Lost</option></select>
             </div>
@@ -891,12 +891,22 @@ function saveStoredFile(path, filename) {
 }
 
 function getH(t){return{'apikey':ANON_KEY,'Authorization':'Bearer '+(t||ANON_KEY),'Content-Type':'application/json','Prefer':'return=representation'};}
-async function api(m,url,body,t){const o={method:m,headers:getH(t)};if(body)o.body=JSON.stringify(body);const r=await fetch(url,o);if(!r.ok)throw new Error(await r.text());return m==='DELETE'?null:r.json();}
+async function api(m,url,body,t,_retry=0){const o={method:m,headers:getH(t)};if(body)o.body=JSON.stringify(body);const r=await fetch(url,o);if(r.status===429&&_retry<3){await new Promise(res=>setTimeout(res,1000*Math.pow(2,_retry)));return api(m,url,body,t,_retry+1);}if(!r.ok)throw new Error(await r.text());return m==='DELETE'?null:r.json();}
+function debounce(fn,ms){let tid;return function(...a){clearTimeout(tid);tid=setTimeout(()=>fn.apply(this,a),ms);};}
+const dRenderLeads=debounce(renderLeads,300);
+const dRenderTenders=debounce(renderTenders,300);
 
 function setLoginRole(r){loginRole=r;['master_admin','admin','salesperson'].forEach(x=>document.getElementById('ltab-'+x).classList.toggle('active',x===r));}
 async function doLogin(){
   const email=gv('login-email'),pw=gv('login-password');
   if(!email||!pw){showLE('Please enter email and password.');return;}
+  const BLOCK_LIMIT=5,BLOCK_MS=15*60*1000;
+  const blk=JSON.parse(localStorage.getItem('tcm_login_block')||'{"count":0,"firstFail":0}');
+  if(blk.count>=BLOCK_LIMIT){
+    const remaining=Math.ceil((blk.firstFail+BLOCK_MS-Date.now())/60000);
+    if(remaining>0){showLE('Too many failed attempts. Try again in '+remaining+' minute'+(remaining!==1?'s':'')+'.');return;}
+    localStorage.removeItem('tcm_login_block');
+  }
   const btn=document.getElementById('login-btn');btn.textContent='Signing in...';btn.disabled=true;hideLE();
   try{
     const r=await fetch(`${SB}/auth/v1/token?grant_type=password`,{method:'POST',headers:{'apikey':ANON_KEY,'Content-Type':'application/json'},body:JSON.stringify({email,password:pw})});
@@ -909,12 +919,19 @@ async function doLogin(){
     const prof=pa[0];
     if(prof.role!==loginRole)throw new Error(`This account is not a ${loginRole.replace('_',' ')}. Please select the correct tab.`);
     if(!prof.is_active)throw new Error('This account has been deactivated.');
+    localStorage.removeItem('tcm_login_block');
     const rememberMe=document.getElementById('remember-me').checked;
     const sess={token,userId:uid,profile:prof,expiry:Date.now()+(rememberMe?30*24*3600000:8*3600000)};
     if(document.getElementById('remember-me').checked)localStorage.setItem('tcm_sess',JSON.stringify(sess));
     else sessionStorage.setItem('tcm_sess',JSON.stringify(sess));
     await startApp(token,prof);
-  }catch(e){showLE(e.message);}
+  }catch(e){
+    const b=JSON.parse(localStorage.getItem('tcm_login_block')||'{"count":0,"firstFail":0}');
+    const newCount=b.count+1;
+    localStorage.setItem('tcm_login_block',JSON.stringify({count:newCount,firstFail:b.firstFail||Date.now()}));
+    const left=BLOCK_LIMIT-newCount;
+    showLE(e.message+(left>0&&left<=2?' ('+left+' attempt'+(left!==1?'s':'')+' remaining)':''));
+  }
   finally{btn.textContent='Sign In';btn.disabled=false;}
 }
 function showLE(m){const e=document.getElementById('login-error');e.textContent=m;e.style.display='block';}
