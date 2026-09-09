@@ -141,20 +141,20 @@ body{font-family:var(--font);background:var(--surface);color:var(--text);font-si
 .topbar-right{display:flex;align-items:center;gap:12px}
 .notif-btn{position:relative;background:none;border:none;cursor:pointer;padding:6px;border-radius:var(--radius);color:var(--muted);font-size:16px;display:flex;align-items:center}
 .notif-btn:hover{background:var(--surface2)}
-.notif-badge{position:absolute;top:2px;right:2px;background:#e03131;color:#fff;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:none;align-items:center;justify-conten[...] 
-.topbar-avatar{width:32px;height:32px;border-radius:50%;background:var(--blue-light);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--blue);cursor:poin[...] 
+.notif-badge{position:absolute;top:2px;right:2px;background:#e03131;color:#fff;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:none;align-items:center;justify-content:center}
+.topbar-avatar{width:32px;height:32px;border-radius:50%;background:var(--blue-light);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--blue);cursor:pointer;border:2px solid transparent;transition:all 0.2s}
 .topbar-avatar:hover{border-color:var(--blue)}
 .topbar-avatar img{width:100%;height:100%;object-fit:cover}
 .role-chip{font-size:9px;font-weight:700;padding:3px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.4px}
 .rc-master{background:#fef3c7;color:#92400e}.rc-admin{background:#ede9fe;color:#5b21b6}.rc-sales{background:var(--teal-bg);color:var(--teal-dark)}
 
-.btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:var(--radius);font-size:12px;font-weight:600;cursor:pointer;border:none;line-height:1.4;text-decoration:none;font-fam[...] 
+.btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:var(--radius);font-size:12px;font-weight:600;cursor:pointer;border:none;line-height:1.4;text-decoration:none;font-family:var(--font)}
 .btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:var(--blue-dark);box-shadow:0 2px 4px rgba(37,99,235,0.2)}
 .btn-teal{background:var(--teal);color:#fff}.btn-teal:hover{background:var(--teal-dark)}
 .btn-secondary{background:#fff;color:var(--text);border:1px solid var(--border-md)}.btn-secondary:hover{background:var(--surface);border-color:var(--muted)}
 .btn-danger{background:#fef2f2;color:#dc2626;border:1px solid #fecaca}.btn-danger:hover{background:#fee2e2}
 .btn-sm{padding:5px 10px;font-size:11px}
-.btn-icon{background:none;border:none;cursor:pointer;padding:4px 6px;border-radius:4px;color:var(--muted);display:inline-flex;align-items:center;font-size:14px;line-height:1;font-family:var(--font);tr[...] 
+.btn-icon{background:none;border:none;cursor:pointer;padding:4px 6px;border-radius:4px;color:var(--muted);display:inline-flex;align-items:center;font-size:14px;line-height:1;font-family:var(--font);transition:all 0.2s}
 .btn-icon:hover{background:var(--surface2);color:var(--text)}
 .btn-icon.red:hover{background:#fef2f2;color:#dc2626}
 
@@ -223,47 +223,158 @@ body{font-family:var(--font);background:var(--surface);color:var(--text);font-si
   </div>
 </div>
 
-<!-- Insert logo-detection fallback script -->
+<!-- Logo detection fallback script — improved version -->
 <script>
-// Detect local logo file (tries common relative paths) and update login/sidebar logos + favicon when found.
-document.addEventListener('DOMContentLoaded', function(){
-  const candidates = [
+(function(){
+  'use strict';
+  
+  // Configuration
+  const DEBUG = false; // Set to true for console logging
+  const LOCAL_LOGO_TIMEOUT = 1500; // Reduced timeout for faster fallback
+  const DEFAULT_LOGO_URL = 'https://tenagacekap.com.my/wp-content/uploads/2019/05/tenaga-log-icon.png';
+  
+  // Local logo candidates (no duplicates, no URL encoding)
+  const LOCAL_LOGO_PATHS = [
     'TCM Logo 2.png',
     './TCM Logo 2.png',
     '/TCM Logo 2.png',
-    'TCM%20Logo%202.png',
-    './TCM%20Logo%202.png'
+    'assets/TCM Logo 2.png',
+    'assets/logo.png'
   ];
-  const loginImg = document.getElementById('login-logo-img');
-  const sidebarImg = document.getElementById('sidebar-logo-img');
-  const favicon = document.getElementById('favicon-link');
-  function testImage(url, timeout){
-    timeout = timeout || 4000;
-    return new Promise(function(resolve){
+  
+  const log = (msg, data) => {
+    if (DEBUG) console.log(`[TCM Logo] ${msg}`, data || '');
+  };
+  
+  /**
+   * Test if an image URL is accessible
+   * @param {string} url - The URL to test
+   * @param {number} timeout - Timeout in milliseconds
+   * @returns {Promise<boolean>}
+   */
+  const testImageUrl = (url, timeout = LOCAL_LOGO_TIMEOUT) => {
+    return new Promise((resolve) => {
+      let completed = false;
+      const cleanup = () => completed = true;
+      
       const img = new Image();
-      let done = false;
-      img.onload = function(){ if(!done){ done=true; resolve(true); } };
-      img.onerror = function(){ if(!done){ done=true; resolve(false); } };
-      setTimeout(function(){ if(!done){ done=true; resolve(false); } }, timeout);
-      img.src = url;
-    });
-  }
-  (async function(){
-    for(const p of candidates){
-      try{
-        const ok = await testImage(p);
-        if(ok){
-          if(loginImg) loginImg.src = p;
-          if(sidebarImg) sidebarImg.src = p;
-          if(favicon) favicon.href = p;
-          return;
+      img.crossOrigin = 'anonymous';
+      
+      img.onload = () => {
+        if (!completed) {
+          cleanup();
+          log(`✓ Logo found: ${url}`);
+          resolve(true);
         }
-      }catch(e){ /* ignore */ }
+      };
+      
+      img.onerror = () => {
+        if (!completed) {
+          cleanup();
+          log(`✗ Logo failed: ${url}`);
+          resolve(false);
+        }
+      };
+      
+      // Timeout fallback
+      const timer = setTimeout(() => {
+        if (!completed) {
+          cleanup();
+          log(`⏱ Timeout: ${url}`);
+          resolve(false);
+        }
+      }, timeout);
+      
+      // Attempt to load the image
+      try {
+        img.src = url;
+      } catch (e) {
+        cleanup();
+        log(`⚠ Error loading ${url}:`, e.message);
+        resolve(false);
+      }
+    });
+  };
+  
+  /**
+   * Update logo in the DOM
+   * @param {string} localPath - Local logo path
+   */
+  const updateLogos = (localPath) => {
+    const loginImg = document.getElementById('login-logo-img');
+    const sidebarImg = document.getElementById('sidebar-logo-img');
+    
+    if (loginImg) {
+      loginImg.src = localPath;
+      log('Updated login logo');
     }
-    // If none found, keep the external default image.
-  })();
-});
+    
+    if (sidebarImg) {
+      sidebarImg.src = localPath;
+      log('Updated sidebar logo');
+    }
+    
+    // Note: favicon updates are skipped for local paths to avoid 404 errors in browser console
+    // Favicons are typically served via web server, not relative file paths
+  };
+  
+  /**
+   * Initialize logo detection
+   */
+  const initLogoDetection = async () => {
+    log('Starting logo detection...');
+    
+    for (const path of LOCAL_LOGO_PATHS) {
+      try {
+        const found = await testImageUrl(path);
+        if (found) {
+          updateLogos(path);
+          log('Logo detection complete!');
+          return; // Success - stop searching
+        }
+      } catch (e) {
+        log(`Exception testing ${path}:`, e.message);
+        // Continue to next candidate
+      }
+    }
+    
+    // All local paths failed, keeping default external logo
+    log('No local logo found. Using default external URL.');
+  };
+  
+  // Run on DOM ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initLogoDetection);
+  } else {
+    // DOM already loaded
+    initLogoDetection();
+  }
+})();
 </script>
-/ Minimal fallback helpers — prevents ReferenceError when the main script is missing/truncated. (function(){ window.gv = function(id){ const el = document.getElementById(id); if(!el) return ''; if(el.type === 'checkbox') return el.checked; return el.value; }; window.sv = function(id, val){ const el = document.getElementById(id); try{ if(el){ if(['INPUT','SELECT','TEXTAREA'].includes(el.tagName)){ el.value = val; } else { el.textContent = val; } } }catch(e){} try{ localStorage.setItem('tcm:'+id, String(val)); } catch(e){} }; window.switchTab = function(id){ document.querySelectorAll('.nav-tab').forEach(t=>t.classList.toggle('active', t.id==='tab-'+id)); document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active', v.id==='view-'+id)); const title = document.getElementById('tab-'+id)?.textContent || ''; const h = document.querySelector('.header-title'); if(h) h.textContent = title; }; window.renderLeads = function(){ const tbody = document.getElementById('leads-tbody'); if(!tbody) return; tbody.innerHTML = ''; const empty = document.getElementById('leads-empty'); if(empty) empty.style.display = 'block'; const lc = document.getElementById('lead-count'); if(lc) lc.textContent = '0 leads'; }; window.renderTenders = function(){ const tbody = document.getElementById('tenders-tbody'); if(!tbody) return; tbody.innerHTML=''; const el = document.getElementById('tenders-empty'); if(el) el.style.display='block'; const tc = document.getElementById('tender-count'); if(tc) tc.textContent = '0 tenders'; }; window.renderDealsContent = function(){ const el = document.getElementById('deals-by-sp'); if(el) el.innerHTML = '<div class="empty">No deals yet.</div>'; }; window.renderRetarget = function(){ const el=document.getElementById('retarget-list'); if(el) el.innerHTML=''; const e=document.getElementById('retarget-empty'); if(e) e.style.display='block'; }; window.renderTopbarProfile = function(){ if(window.currentProfile){ const name = currentProfile.full_name || currentProfile.name || currentProfile.email || ''; const email = currentProfile.email || ''; const avatar = document.getElementById('topbar-avatar'); if(avatar){ avatar.textContent = (name||'U').slice(0,2).toUpperCase(); } const dname = document.getElementById('profile-name-display'); if(dname) dname.textContent = name; const dem = document.getElementById('profile-email-display'); if(dem) dem.textContent = email; const chip = document.getElementById('topbar-role-chip'); if(chip){ chip.className = 'role-chip rc-'+(currentProfile.role||'sales'); chip.textContent = (currentProfile.role||'').toUpperCase(); } } }; window.loadAll = async function(){ try{ const selIds = ['l-assigned-to','t-assigned-to','lead-fsales']; selIds.forEach(id=>{ const s = document.getElementById(id); if(!s) return; s.innerHTML = '<option value="">Unassigned</option>'; if(window.currentProfile){ const opt = document.createElement('option'); opt.value = currentProfile.id || currentProfile.user_id || (currentProfile.email||'self'); opt.textContent = currentProfile.full_name || currentProfile.name || currentProfile.email; s.appendChild(opt); } }); renderLeads(); renderTenders(); renderDealsContent(); }catch(e){console.warn('loadAll fallback error',e)} }; window.checkPendingReminders = function(){ /* no-op fallback */ }; window.openLeadModal = function(){ const m=document.getElementById('lead-modal'); if(m){ m.classList.add('open'); m.style.display='flex'; } }; window.closeLeadModal = function(){ const m=document.getElementById('lead-modal'); if(m){ m.classList.remove('open'); m.style.display='none'; } }; window.openTenderModal = function(){ const m=document.getElementById('tender-modal'); if(m){ m.classList.add('open'); m.style.display='flex'; } }; window.closeTenderModal = function(){ const m=document.getElementById('tender-modal'); if(m){ m.classList.remove('open'); m.style.display='none'; } }; window.openAddSPModal = function(){ const m=document.getElementById('sp-modal'); if(m){ m.classList.add('open'); m.style.display='flex'; } }; window.closeSPModal = function(){ const m=document.getElementById('sp-modal'); if(m){ m.classList.remove('open'); m.style.display='none'; } }; window.saveLead = function(){ showToast('Saving lead (fallback) — operation not connected','error'); closeLeadModal(); }; window.saveTender = function(){ showToast('Saving tender (fallback) — operation not connected','error'); closeTenderModal(); }; window.saveSalesperson = function(){ showToast('Creating account (fallback) — operation not connected','error'); closeSPModal(); }; window.showToast = window.showToast || function(msg, type='success'){ const t = document.getElementById('toast'); if(!t){ alert(msg); return; } t.textContent = msg; t.className = 'toast show ' + (type==='error'?'error':'success'); t.style.pointerEvents='auto'; setTimeout(()=>{ t.className = 'toast'; t.style.pointerEvents='none'; }, 3500); }; window.toggleNotifPanel = function(){ const p=document.getElementById('notif-panel'); if(!p) return; p.classList.toggle('open'); }; window.markAllRead = function(){ const nl=document.getElementById('notif-list'); if(!nl) return; nl.innerHTML='<div class="empty">No notifications yet.</div>'; showToast('Marked all read','success'); }; if(!window.gv) window.gv = function(id){ const el=document.getElementById(id); return el?el.value:''; }; if(!window.sv) window.sv = function(id,val){ try{ const el=document.getElementById(id); if(el) el.value=val; }catch(e){} }; window.addEventListener('DOMContentLoaded', function(){ try{ const s = localStorage.getItem('tcm_sess') || sessionStorage.getItem('tcm_sess'); if(s){ const sess = JSON.parse(s); window.currentUser = { token: sess.token }; window.currentProfile = sess.profile || {}; document.getElementById('login-page').style.display='none'; document.getElementById('app').style.display='flex'; renderTopbarProfile(); loadAll(); } }catch(e){} }); })(); </script>
+
+<!-- Minimal fallback helpers — prevents ReferenceError when main script is missing -->
+<script>
+(function(){
+  window.gv = function(id) {
+    const el = document.getElementById(id);
+    return el ? el.value : '';
+  };
+  window.sv = function(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.value = val;
+  };
+  window.gc = function(id) {
+    return document.getElementById(id);
+  };
+  // Stubs for missing main functions
+  window.doLogin = window.doLogin || function() { console.warn('[Stub] doLogin() not loaded'); };
+  window.doLogout = window.doLogout || function() { console.warn('[Stub] doLogout() not loaded'); };
+  window.setLoginRole = window.setLoginRole || function(role) { console.warn('[Stub] setLoginRole() not loaded:', role); };
+  window.showForgotPassword = window.showForgotPassword || function() { console.warn('[Stub] showForgotPassword() not loaded'); };
+  window.switchTab = window.switchTab || function(tab) { console.warn('[Stub] switchTab() not loaded:', tab); };
+  window.toggleNotifPanel = window.toggleNotifPanel || function() { console.warn('[Stub] toggleNotifPanel() not loaded'); };
+})();
+</script>
+
 </body>
 </html>
